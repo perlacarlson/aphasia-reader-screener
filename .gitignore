@@ -1,0 +1,11 @@
+# Python virtual environments & bytecode
+venv/
+ENV/
+env/
+__pycache__/
+*.pyc
+
+# Operating system noise
+.DS_Store
+.vscode/
+.idea/

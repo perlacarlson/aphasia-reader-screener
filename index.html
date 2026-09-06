@@ -1,0 +1,2206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proyecto Lectura Accesible | Jack London — To Build a Fire</title>
+  <style>
+    :root {
+      --reader-font-size: 19px;
+      --reader-line-height: 1.85;
+
+      /* Standard Palette (WCAG AA Compliant) */
+      --bg-canvas: #F8FAFC;
+      --bg-card: #FFFFFF;
+      --text-main: #0F172A;
+      --text-muted: #475569;
+      --border-card: #CBD5E1;
+      --accent-en: #047857;
+      --accent-es: #1D4ED8;
+      --sync-highlight: #FEF08A;
+      --sync-border: #EAB308;
+      --speaking-glow-en: #A7F3D0;
+      --speaking-glow-es: #BFDBFE;
+      --flag-bg: #FEF3C7;
+      --flag-text: #92400E;
+      --btn-bg: #F1F5F9;
+      --btn-border: #94A3B8;
+      --anchor-bg: #EEF2F6;
+      --anchor-border: #CBD5E1;
+
+      /* Chromatic Column Separation */
+      --col-en-bg: #F0FDF4;
+      --col-en-border: #BBF7D0;
+      --col-es-bg: #EFF6FF;
+      --col-es-border: #BFDBFE;
+
+      /* Memory Dropdown Styling */
+      --recap-bg: #FAF5FF;
+      --recap-border: #D8B4FE;
+      --recap-text: #6B21A8;
+    }
+
+    /* High-Contrast / Glare-Reduction Mode (21:1 Contrast Ratio) */
+    body.high-contrast {
+      --bg-canvas: #090D16;
+      --bg-card: #000000;
+      --text-main: #FFFFFF;
+      --text-muted: #CBD5E1;
+      --border-card: #64748B;
+      --accent-en: #34D399;
+      --accent-es: #60A5FA;
+      --sync-highlight: #FDE047;
+      --sync-border: #FACC15;
+      --speaking-glow-en: #064E3B;
+      --speaking-glow-es: #1E3A8A;
+      --flag-bg: #78350F;
+      --flag-text: #FEF3C7;
+      --btn-bg: #1E293B;
+      --btn-border: #94A3B8;
+      --anchor-bg: #1E293B;
+      --anchor-border: #64748B;
+
+      --col-en-bg: #042419;
+      --col-en-border: #059669;
+      --col-es-bg: #0B1E3B;
+      --col-es-border: #2563EB;
+
+      --recap-bg: #2E1065;
+      --recap-border: #A855F7;
+      --recap-text: #F3E8FF;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: var(--reader-font-size);
+      line-height: var(--reader-line-height);
+      letter-spacing: 0.02em;
+      word-spacing: 0.04em;
+      color: var(--text-main);
+      background-color: var(--bg-canvas);
+      margin: 0;
+      padding: 2rem 1.5rem;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid var(--border-card);
+      padding-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 1.85rem;
+      margin: 0 0 0.35rem 0;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+    }
+
+    .metadata {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .voice-badge {
+      display: inline-block;
+      margin-top: 0.75rem;
+      font-size: 0.78rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: var(--text-muted);
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      padding: 0.35rem 0.7rem;
+      border-radius: 6px;
+    }
+    .voice-badge strong { color: var(--accent-en); }
+
+    /* Accessibility Toolbar */
+    .a11y-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      background: var(--bg-card);
+      border: 2px solid var(--border-card);
+      border-radius: 12px;
+      padding: 0.85rem 1.25rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+    }
+
+    .a11y-group {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .a11y-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-right: 0.2rem;
+    }
+
+    /* 44x44px Motor-Accessible Target Rules */
+    .a11y-btn {
+      min-width: 44px;
+      min-height: 44px;
+      background-color: var(--btn-bg);
+      color: var(--text-main);
+      border: 2px solid var(--btn-border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.4rem 0.85rem;
+      transition: transform 0.1s ease, border-color 0.15s ease;
+    }
+
+    .a11y-btn:hover {
+      border-color: var(--accent-en);
+      transform: translateY(-1px);
+    }
+
+    .a11y-btn:focus-visible {
+      outline: 3px solid var(--accent-en);
+      outline-offset: 2px;
+    }
+
+    .a11y-btn.is-active {
+      background-color: var(--accent-en);
+      color: #FFFFFF;
+      border-color: var(--accent-en);
+    }
+
+    /* Bilateral Reading Grid */
+    .reading-grid {
+      display: grid;
+      transition: all 0.2s ease;
+      margin-bottom: 1rem;
+    }
+
+    .lang-column {
+      border-radius: 12px;
+      padding: 1.25rem;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    /* English Monolingual Mode */
+    body.lang-en .reading-grid {
+      grid-template-columns: 1fr;
+      max-width: 760px;
+      margin: 0 auto 1rem auto;
+    }
+    body.lang-en .col-en,
+    body.lang-en .lang-column.en-col { display: block; background-color: var(--col-en-bg); border: 1.5px solid var(--col-en-border); }
+    body.lang-en .col-es,
+    body.lang-en .lang-column.es-col { display: none !important; }
+
+    /* Spanish Monolingual Mode */
+    body.lang-es .reading-grid {
+      grid-template-columns: 1fr;
+      max-width: 760px;
+      margin: 0 auto 1rem auto;
+    }
+    body.lang-es .col-es,
+    body.lang-es .lang-column.es-col { display: block; background-color: var(--col-es-bg); border: 1.5px solid var(--col-es-border); }
+    body.lang-es .col-en,
+    body.lang-es .lang-column.en-col { display: none !important; }
+
+    /* Bilingual Dual-Column Mode */
+    body.lang-both .reading-grid {
+      grid-template-columns: 1fr 1fr;
+      max-width: 100%;
+      gap: 2rem;
+    }
+    body.lang-both .col-en,
+    body.lang-both .lang-column.en-col {
+      display: block;
+      background-color: var(--col-en-bg);
+      border: 2px solid var(--col-en-border);
+    }
+    body.lang-both .col-es,
+    body.lang-both .lang-column.es-col {
+      display: block;
+      background-color: var(--col-es-bg);
+      border: 2px solid var(--col-es-border);
+    }
+
+    .column-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border-card);
+    }
+    .col-en { color: var(--accent-en); }
+    .col-es { color: var(--accent-es); }
+
+    .sentence-block {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border-card);
+      border-radius: 14px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.04);
+      transition: all 0.2s ease;
+    }
+
+    /* 68px ARASAAC Visual Tile */
+    .anchor-header {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      margin-bottom: 1.35rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px dashed var(--border-card);
+    }
+
+    .anchor-icon-wrapper {
+      width: 68px;
+      height: 68px;
+      background-color: var(--anchor-bg);
+      border: 2px solid var(--anchor-border);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px;
+      font-size: 2.75rem;
+      flex-shrink: 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+    }
+
+    .arasaac-icon {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    body.high-contrast .arasaac-icon {
+      filter: invert(1) hue-rotate(180deg) brightness(1.2);
+    }
+
+    .anchor-text-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .anchor-tag {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-en);
+    }
+
+    .anchor-concept {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.01em;
+    }
+
+    .unit-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.55rem;
+    }
+
+    .idea-unit {
+      flex-grow: 1;
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      border-left: 4px solid transparent;
+      cursor: pointer;
+      text-align: left;
+      background-color: var(--bg-card);
+      transition: all 0.15s ease-in-out;
+    }
+
+    .idea-unit.en { border-left-color: var(--accent-en); }
+    .idea-unit.es { border-left-color: var(--accent-es); color: var(--text-muted); }
+
+    /* Cross-Linguistic Hover Synchrony */
+    .idea-unit.is-active {
+      background-color: var(--sync-highlight) !important;
+      color: #000000 !important;
+      border-left-color: var(--sync-border) !important;
+      font-weight: 600;
+    }
+
+    .idea-unit.en.is-speaking {
+      background-color: var(--speaking-glow-en) !important;
+      border-left-color: var(--accent-en) !important;
+      color: #000000 !important;
+    }
+
+    .idea-unit.es.is-speaking {
+      background-color: var(--speaking-glow-es) !important;
+      border-left-color: var(--accent-es) !important;
+      color: #000000 !important;
+    }
+
+    body.high-contrast .idea-unit.en.is-speaking,
+    body.high-contrast .idea-unit.es.is-speaking {
+      color: #FFFFFF !important;
+    }
+
+    .tts-btn {
+      min-width: 44px;
+      min-height: 44px;
+      background: var(--bg-card);
+      border: 1.5px solid var(--border-card);
+      border-radius: 8px;
+      font-size: 1.15rem;
+      cursor: pointer;
+      line-height: 1;
+      color: var(--text-muted);
+      transition: background 0.15s ease, transform 0.1s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .tts-btn:hover {
+      background: var(--border-card);
+      transform: scale(1.05);
+    }
+
+    .tts-btn.en:focus-visible { outline: 2px solid var(--accent-en); }
+    .tts-btn.es:focus-visible { outline: 2px solid var(--accent-es); }
+
+    .clinical-alert {
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      background-color: var(--flag-bg);
+      color: var(--flag-text);
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+      margin-bottom: 1.15rem;
+    }
+
+    /* Tier 3 Continuous Prose Mode */
+    body.tier-3 .sentence-block {
+      border: none;
+      box-shadow: none;
+      background: transparent;
+      padding: 0;
+      margin-bottom: 2.5rem;
+    }
+
+    body.tier-3 .anchor-header,
+    body.tier-3 .clinical-alert,
+    body.tier-3 .tts-btn {
+      display: none;
+    }
+
+    body.tier-3 .unit-wrapper {
+      display: inline;
+      margin: 0;
+    }
+
+    body.tier-3 .idea-unit {
+      display: inline;
+      padding: 0.15rem 0.35rem;
+      margin: 0;
+      border-left: none;
+      border-radius: 4px;
+      background-color: transparent;
+      line-height: 2.1;
+      cursor: pointer;
+    }
+
+    body.tier-3 .idea-unit:hover {
+      background-color: var(--sync-highlight) !important;
+      color: #000000 !important;
+    }
+
+    body.tier-3 .idea-unit.is-speaking {
+      background-color: var(--speaking-glow-en) !important;
+      color: #000000 !important;
+      text-decoration: underline;
+    }
+
+    /* Tier 3 Metacognitive Retrieval Accordion */
+    .chapter-recap-dropdown {
+      background-color: var(--recap-bg);
+      border: 2px solid var(--recap-border);
+      border-radius: 12px;
+      margin-top: 1.35rem;
+      overflow: hidden;
+      transition: all 0.2s ease;
+    }
+
+    .chapter-recap-dropdown[open] {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .recap-summary {
+      min-height: 48px;
+      padding: 0.75rem 1.25rem;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--recap-text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+      outline: none;
+      list-style: none;
+    }
+
+    .recap-summary::-webkit-details-marker { display: none; }
+
+    .recap-summary:hover {
+      background-color: rgba(168, 85, 247, 0.08);
+    }
+
+    .recap-summary:focus-visible {
+      outline: 3px solid var(--accent-en);
+      outline-offset: -2px;
+    }
+
+    .recap-summary::after {
+      content: '▼';
+      font-size: 0.8rem;
+      transition: transform 0.2s ease;
+      color: var(--recap-text);
+    }
+
+    .chapter-recap-dropdown[open] .recap-summary::after {
+      transform: rotate(180deg);
+    }
+
+    .recap-content-body {
+      padding: 0 1.25rem 1.25rem 1.25rem;
+      border-top: 1px dashed var(--recap-border);
+      padding-top: 1rem;
+    }
+
+    .recap-list {
+      margin: 0;
+      padding-left: 1.4rem;
+      font-size: 0.96rem;
+      line-height: 1.7;
+    }
+
+    .recap-list li {
+      margin-bottom: 0.45rem;
+    }
+
+    body.lang-en .recap-content-body [lang="es"],
+    body.lang-en .recap-summary .recap-title-es { display: none !important; }
+
+    body.lang-es .recap-content-body [lang="en"],
+    body.lang-es .recap-summary .recap-title-en { display: none !important; }
+
+    body.lang-both .recap-summary .recap-title-en,
+    body.lang-both .recap-summary .recap-title-es { display: inline; }
+    body.lang-both .recap-content-body [lang="en"],
+    body.lang-both .recap-content-body [lang="es"] { display: block; }
+  </style>
+</head>
+<body class="tier-2 lang-both">
+  <div class="container">
+    <header>
+      <h1>To Build a Fire — Jack London</h1>
+      <div class="metadata">Proyecto Lectura Accesible • Department of Speech & Hearing Sciences • Portland State University</div>
+      <div id="voice-status" class="voice-badge">Resolving clinical speech engines...</div>
+    </header>
+
+    <section class="a11y-toolbar" aria-label="Reading Controls">
+      <div class="a11y-group">
+        <span class="a11y-label">Tier:</span>
+        <button type="button" id="btn-tier-1" class="a11y-btn" onclick="setSeverityTier('tier-1')">Tier 1 (Severe)</button>
+        <button type="button" id="btn-tier-2" class="a11y-btn is-active" onclick="setSeverityTier('tier-2')">Tier 2 (Moderate)</button>
+        <button type="button" id="btn-tier-3" class="a11y-btn" onclick="setSeverityTier('tier-3')">Tier 3 (Mild/Book)</button>
+      </div>
+
+      <div class="a11y-group">
+        <span class="a11y-label">Language:</span>
+        <button type="button" id="btn-lang-en" class="a11y-btn" onclick="setLanguageMode('en')">English</button>
+        <button type="button" id="btn-lang-es" class="a11y-btn" onclick="setLanguageMode('es')">Español</button>
+        <button type="button" id="btn-lang-both" class="a11y-btn is-active" onclick="setLanguageMode('both')">Both</button>
+      </div>
+
+      <div class="a11y-group">
+        <span class="a11y-label">Size:</span>
+        <button type="button" class="a11y-btn is-active" onclick="setFontSize('19px', this)">A</button>
+        <button type="button" class="a11y-btn" onclick="setFontSize('23px', this)">A+</button>
+        <button type="button" class="a11y-btn" onclick="setFontSize('27px', this)">A++</button>
+      </div>
+
+      <div class="a11y-group">
+        <span class="a11y-label">Visual:</span>
+        <button type="button" id="contrast-toggle" class="a11y-btn" onclick="toggleContrast()" aria-pressed="false">
+          🌓 High Contrast
+        </button>
+      </div>
+    </section>
+
+    <div class="reading-grid">
+      <div class="column-title col-en">English (Primary Adapted)</div>
+      <div class="column-title col-es">Español (Andamiaje Clínico)</div>
+    </div>
+
+    <main id="narrative-canvas">
+      <div id="content-tier-1" class="tier-view" style="display: none;">
+        
+    <div class="sentence-block">
+      <div class="anchor-header">
+        <div class="anchor-icon-wrapper" aria-hidden="true"><img src="assets/pictograms/3246.png" alt="pine_forest" class="arasaac-icon" loading="lazy" /></div>
+        <div class="anchor-text-group">
+          <span class="anchor-tag">Tier 1 • Scene 1</span>
+          <span class="anchor-concept">The Cold Trail / El camino frío</span>
+        </div>
+      </div>
+      
+      <div class="reading-grid">
+        <div class="lang-column en-col" lang="en">
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The day was <strong>cold</strong>.', 't1-b0-l0', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b0-l0">The day was <strong>cold</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The snow was <strong>deep</strong>.', 't1-b0-l1', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b0-l1">The snow was <strong>deep</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('A man <strong>walked</strong>.', 't1-b0-l2', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b0-l2">A man <strong>walked</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('A dog <strong>followed</strong>.', 't1-b0-l3', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b0-l3">A dog <strong>followed</strong>.</div>
+        </div>
+        </div>
+        <div class="lang-column es-col" lang="es">
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El día estaba <strong>frío</strong>.', 't1-b0-l0', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b0-l0">El día estaba <strong>frío</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('La nieve era <strong>profunda</strong>.', 't1-b0-l1', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b0-l1">La nieve era <strong>profunda</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Un hombre <strong>caminaba</strong>.', 't1-b0-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b0-l2">Un hombre <strong>caminaba</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Un perro lo <strong>seguía</strong>.', 't1-b0-l3', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b0-l3">Un perro lo <strong>seguía</strong>.</div>
+        </div>
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <div class="sentence-block">
+      <div class="anchor-header">
+        <div class="anchor-icon-wrapper" aria-hidden="true"><img src="assets/pictograms/2487.png" alt="clock" class="arasaac-icon" loading="lazy" /></div>
+        <div class="anchor-text-group">
+          <span class="anchor-tag">Tier 1 • Scene 2</span>
+          <span class="anchor-concept">Nine O'Clock / Las nueve de la mañana</span>
+        </div>
+      </div>
+      
+      <div class="reading-grid">
+        <div class="lang-column en-col" lang="en">
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('It was <strong>nine o\'clock</strong>.', 't1-b1-l0', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b1-l0">It was <strong>nine o'clock</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('There was <strong>no sun</strong>.', 't1-b1-l1', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b1-l1">There was <strong>no sun</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The sky was <strong>gray</strong>.', 't1-b1-l2', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b1-l2">The sky was <strong>gray</strong>.</div>
+        </div>
+        </div>
+        <div class="lang-column es-col" lang="es">
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Eran las <strong>nueve</strong>.', 't1-b1-l0', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b1-l0">Eran las <strong>nueve</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('No había <strong>sol</strong>.', 't1-b1-l1', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b1-l1">No había <strong>sol</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El cielo estaba <strong>gris</strong>.', 't1-b1-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b1-l2">El cielo estaba <strong>gris</strong>.</div>
+        </div>
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <div class="sentence-block">
+      <div class="anchor-header">
+        <div class="anchor-icon-wrapper" aria-hidden="true"><img src="assets/pictograms/5453.png" alt="extreme_cold" class="arasaac-icon" loading="lazy" /></div>
+        <div class="anchor-text-group">
+          <span class="anchor-tag">Tier 1 • Scene 3</span>
+          <span class="anchor-concept">Extreme Cold (-50°) / Frío extremo</span>
+        </div>
+      </div>
+      
+      <div class="reading-grid">
+        <div class="lang-column en-col" lang="en">
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The air was <strong>freezing</strong>.', 't1-b2-l0', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b2-l0">The air was <strong>freezing</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('Spit <strong>cracked</strong> in air.', 't1-b2-l1', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b2-l1">Spit <strong>cracked</strong> in air.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('It was <strong>fifty below</strong>.', 't1-b2-l2', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b2-l2">It was <strong>fifty below</strong>.</div>
+        </div>
+        </div>
+        <div class="lang-column es-col" lang="es">
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El aire era <strong>helado</strong>.', 't1-b2-l0', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b2-l0">El aire era <strong>helado</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('La saliva <strong>tronó</strong> al caer.', 't1-b2-l1', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b2-l1">La saliva <strong>tronó</strong> al caer.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Hacía <strong>mucho frío</strong>.', 't1-b2-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b2-l2">Hacía <strong>mucho frío</strong>.</div>
+        </div>
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <div class="sentence-block">
+      <div class="anchor-header">
+        <div class="anchor-icon-wrapper" aria-hidden="true"><img src="assets/pictograms/2838.png" alt="husky_wolf_dog" class="arasaac-icon" loading="lazy" /></div>
+        <div class="anchor-text-group">
+          <span class="anchor-tag">Tier 1 • Scene 4</span>
+          <span class="anchor-concept">The Wolf-Dog / El perro husky</span>
+        </div>
+      </div>
+      
+      <div class="reading-grid">
+        <div class="lang-column en-col" lang="en">
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The dog had <strong>gray fur</strong>.', 't1-b3-l0', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b3-l0">The dog had <strong>gray fur</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The dog was a <strong>husky</strong>.', 't1-b3-l1', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b3-l1">The dog was a <strong>husky</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The dog felt the <strong>cold</strong>.', 't1-b3-l2', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b3-l2">The dog felt the <strong>cold</strong>.</div>
+        </div>
+        </div>
+        <div class="lang-column es-col" lang="es">
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El perro tenía <strong>pelo gris</strong>.', 't1-b3-l0', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b3-l0">El perro tenía <strong>pelo gris</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El perro era un <strong>husky</strong>.', 't1-b3-l1', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b3-l1">El perro era un <strong>husky</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El perro sentía el <strong>peligro</strong>.', 't1-b3-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b3-l2">El perro sentía el <strong>peligro</strong>.</div>
+        </div>
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <div class="sentence-block">
+      <div class="anchor-header">
+        <div class="anchor-icon-wrapper" aria-hidden="true"><img src="assets/pictograms/25315.png" alt="danger" class="arasaac-icon" loading="lazy" /></div>
+        <div class="anchor-text-group">
+          <span class="anchor-tag">Tier 1 • Scene 5</span>
+          <span class="anchor-concept">Hidden Water Traps / Trampas de agua</span>
+        </div>
+      </div>
+      
+      <div class="reading-grid">
+        <div class="lang-column en-col" lang="en">
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('Water ran under <strong>snow</strong>.', 't1-b4-l0', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b4-l0">Water ran under <strong>snow</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The ice was <strong>thin</strong>.', 't1-b4-l1', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b4-l1">The ice was <strong>thin</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('It was a hidden <strong>trap</strong>.', 't1-b4-l2', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b4-l2">It was a hidden <strong>trap</strong>.</div>
+        </div>
+        </div>
+        <div class="lang-column es-col" lang="es">
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Había agua bajo la <strong>nieve</strong>.', 't1-b4-l0', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b4-l0">Había agua bajo la <strong>nieve</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El hielo era muy <strong>delgado</strong>.', 't1-b4-l1', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b4-l1">El hielo era muy <strong>delgado</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Era una <strong>trampa</strong> oculta.', 't1-b4-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b4-l2">Era una <strong>trampa</strong> oculta.</div>
+        </div>
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <div class="sentence-block">
+      <div class="anchor-header">
+        <div class="anchor-icon-wrapper" aria-hidden="true"><img src="assets/pictograms/2494.png" alt="boots" class="arasaac-icon" loading="lazy" /></div>
+        <div class="anchor-text-group">
+          <span class="anchor-tag">Tier 1 • Scene 6</span>
+          <span class="anchor-concept">The Dog Breaks Through / El perro cae</span>
+        </div>
+      </div>
+      
+      <div class="reading-grid">
+        <div class="lang-column en-col" lang="en">
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The dog broke the <strong>ice</strong>.', 't1-b5-l0', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b5-l0">The dog broke the <strong>ice</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('Its paws got <strong>wet</strong>.', 't1-b5-l1', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b5-l1">Its paws got <strong>wet</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The dog bit the <strong>ice off</strong>.', 't1-b5-l2', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b5-l2">The dog bit the <strong>ice off</strong>.</div>
+        </div>
+        </div>
+        <div class="lang-column es-col" lang="es">
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El perro rompió el <strong>hielo</strong>.', 't1-b5-l0', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b5-l0">El perro rompió el <strong>hielo</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Sus patas se <strong>mojaron</strong>.', 't1-b5-l1', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b5-l1">Sus patas se <strong>mojaron</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El perro mordió el <strong>hielo</strong>.', 't1-b5-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b5-l2">El perro mordió el <strong>hielo</strong>.</div>
+        </div>
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <div class="sentence-block">
+      <div class="anchor-header">
+        <div class="anchor-icon-wrapper" aria-hidden="true"><img src="assets/pictograms/2494.png" alt="boots" class="arasaac-icon" loading="lazy" /></div>
+        <div class="anchor-text-group">
+          <span class="anchor-tag">Tier 1 • Scene 7</span>
+          <span class="anchor-concept">Wet Boots / Las botas mojadas</span>
+        </div>
+      </div>
+      <div class="clinical-alert">⚠️ Critical Event: Wet feet in freezing air</div>
+      <div class="reading-grid">
+        <div class="lang-column en-col" lang="en">
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The man fell in <strong>water</strong>.', 't1-b6-l0', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b6-l0">The man fell in <strong>water</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('His feet got <strong>wet</strong>.', 't1-b6-l1', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b6-l1">His feet got <strong>wet</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('He must make a <strong>fire</strong>.', 't1-b6-l2', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b6-l2">He must make a <strong>fire</strong>.</div>
+        </div>
+        </div>
+        <div class="lang-column es-col" lang="es">
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El hombre cayó al <strong>agua</strong>.', 't1-b6-l0', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b6-l0">El hombre cayó al <strong>agua</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Sus pies se <strong>mojaron</strong>.', 't1-b6-l1', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b6-l1">Sus pies se <strong>mojaron</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Él debe hacer un <strong>fuego</strong>.', 't1-b6-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b6-l2">Él debe hacer un <strong>fuego</strong>.</div>
+        </div>
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <div class="sentence-block">
+      <div class="anchor-header">
+        <div class="anchor-icon-wrapper" aria-hidden="true"><img src="assets/pictograms/2341.png" alt="fire" class="arasaac-icon" loading="lazy" /></div>
+        <div class="anchor-text-group">
+          <span class="anchor-tag">Tier 1 • Scene 8</span>
+          <span class="anchor-concept">The Life-Saving Fire / El fuego</span>
+        </div>
+      </div>
+      
+      <div class="reading-grid">
+        <div class="lang-column en-col" lang="en">
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('He gathered dry <strong>twigs</strong>.', 't1-b7-l0', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b7-l0">He gathered dry <strong>twigs</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('He lit a small <strong>fire</strong>.', 't1-b7-l1', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b7-l1">He lit a small <strong>fire</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The flame grew <strong>warm</strong>.', 't1-b7-l2', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b7-l2">The flame grew <strong>warm</strong>.</div>
+        </div>
+        </div>
+        <div class="lang-column es-col" lang="es">
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Juntó ramas <strong>secas</strong>.', 't1-b7-l0', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b7-l0">Juntó ramas <strong>secas</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Encendió un pequeño <strong>fuego</strong>.', 't1-b7-l1', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b7-l1">Encendió un pequeño <strong>fuego</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('La llama daba <strong>calor</strong>.', 't1-b7-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b7-l2">La llama daba <strong>calor</strong>.</div>
+        </div>
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <div class="sentence-block">
+      <div class="anchor-header">
+        <div class="anchor-icon-wrapper" aria-hidden="true"><img src="assets/pictograms/5453.png" alt="extreme_cold" class="arasaac-icon" loading="lazy" /></div>
+        <div class="anchor-text-group">
+          <span class="anchor-tag">Tier 1 • Scene 9</span>
+          <span class="anchor-concept">The Snow Falls / Cae la nieve</span>
+        </div>
+      </div>
+      <div class="clinical-alert">⚠️ Disaster: Fire extinguished</div>
+      <div class="reading-grid">
+        <div class="lang-column en-col" lang="en">
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('Snow fell from a <strong>tree</strong>.', 't1-b8-l0', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b8-l0">Snow fell from a <strong>tree</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('Snow hit the <strong>fire</strong>.', 't1-b8-l1', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b8-l1">Snow hit the <strong>fire</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The fire went <strong>out</strong>.', 't1-b8-l2', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b8-l2">The fire went <strong>out</strong>.</div>
+        </div>
+        </div>
+        <div class="lang-column es-col" lang="es">
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Cayó nieve de un <strong>pino</strong>.', 't1-b8-l0', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b8-l0">Cayó nieve de un <strong>pino</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('La nieve apagó el <strong>fuego</strong>.', 't1-b8-l1', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b8-l1">La nieve apagó el <strong>fuego</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El fuego se <strong>murió</strong>.', 't1-b8-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b8-l2">El fuego se <strong>murió</strong>.</div>
+        </div>
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <div class="sentence-block">
+      <div class="anchor-header">
+        <div class="anchor-icon-wrapper" aria-hidden="true"><img src="assets/pictograms/2838.png" alt="husky_wolf_dog" class="arasaac-icon" loading="lazy" /></div>
+        <div class="anchor-text-group">
+          <span class="anchor-tag">Tier 1 • Scene 10</span>
+          <span class="anchor-concept">Peaceful Sleep / Sueño y supervivencia</span>
+        </div>
+      </div>
+      
+      <div class="reading-grid">
+        <div class="lang-column en-col" lang="en">
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('His hands were <strong>frozen</strong>.', 't1-b9-l0', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b9-l0">His hands were <strong>frozen</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The man went to <strong>sleep</strong>.', 't1-b9-l1', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b9-l1">The man went to <strong>sleep</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The dog ran to <strong>camp</strong>.', 't1-b9-l2', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t1-b9-l2">The dog ran to <strong>camp</strong>.</div>
+        </div>
+        </div>
+        <div class="lang-column es-col" lang="es">
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Sus manos se <strong>congelaron</strong>.', 't1-b9-l0', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b9-l0">Sus manos se <strong>congelaron</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El hombre se quedó <strong>dormido</strong>.', 't1-b9-l1', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b9-l1">El hombre se quedó <strong>dormido</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El perro corrió al <strong>campamento</strong>.', 't1-b9-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t1-b9-l2">El perro corrió al <strong>campamento</strong>.</div>
+        </div>
+        </div>
+      </div>
+      
+    </div>
+    
+      </div>
+
+      <div id="content-tier-2" class="tier-view">
+        
+    <div class="sentence-block">
+      <div class="anchor-header">
+        <div class="anchor-icon-wrapper" aria-hidden="true"><img src="assets/pictograms/3246.png" alt="pine_forest" class="arasaac-icon" loading="lazy" /></div>
+        <div class="anchor-text-group">
+          <span class="anchor-tag">Tier 2 • Scene 1</span>
+          <span class="anchor-concept">The Yukon Trail / El camino de Yukón</span>
+        </div>
+      </div>
+      
+      <div class="reading-grid">
+        <div class="lang-column en-col" lang="en">
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The morning was <strong>cold and gray</strong>.', 't2-b0-l0', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b0-l0">The morning was <strong>cold and gray</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('A man walked on the <strong>Yukon trail</strong>.', 't2-b0-l1', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b0-l1">A man walked on the <strong>Yukon trail</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('He climbed up a <strong>steep dirt hill</strong>.', 't2-b0-l2', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b0-l2">He climbed up a <strong>steep dirt hill</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('A narrow path led into the <strong>forest</strong>.', 't2-b0-l3', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b0-l3">A narrow path led into the <strong>forest</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The forest was full of <strong>pine trees</strong>.', 't2-b0-l4', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b0-l4">The forest was full of <strong>pine trees</strong>.</div>
+        </div>
+        </div>
+        <div class="lang-column es-col" lang="es">
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('La mañana estaba <strong>fría y gris</strong>.', 't2-b0-l0', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b0-l0">La mañana estaba <strong>fría y gris</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Un hombre caminaba por el <strong>camino de Yukón</strong>.', 't2-b0-l1', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b0-l1">Un hombre caminaba por el <strong>camino de Yukón</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Él subió por una <strong>colina de tierra</strong>.', 't2-b0-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b0-l2">Él subió por una <strong>colina de tierra</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Un sendero estrecho entraba al <strong>bosque</strong>.', 't2-b0-l3', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b0-l3">Un sendero estrecho entraba al <strong>bosque</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El bosque estaba lleno de <strong>pinos</strong>.', 't2-b0-l4', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b0-l4">El bosque estaba lleno de <strong>pinos</strong>.</div>
+        </div>
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <div class="sentence-block">
+      <div class="anchor-header">
+        <div class="anchor-icon-wrapper" aria-hidden="true"><img src="assets/pictograms/2487.png" alt="clock" class="arasaac-icon" loading="lazy" /></div>
+        <div class="anchor-text-group">
+          <span class="anchor-tag">Tier 2 • Scene 2</span>
+          <span class="anchor-concept">Nine O'Clock & No Sun / Las nueve de la mañana</span>
+        </div>
+      </div>
+      
+      <div class="reading-grid">
+        <div class="lang-column en-col" lang="en">
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The man stopped to <strong>check the time</strong>.', 't2-b1-l0', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b1-l0">The man stopped to <strong>check the time</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('It was <strong>nine o\'clock</strong> in the morning.', 't2-b1-l1', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b1-l1">It was <strong>nine o'clock</strong> in the morning.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('There was <strong>no sun</strong> in the sky.', 't2-b1-l2', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b1-l2">There was <strong>no sun</strong> in the sky.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('A thick white fog covered the <strong>entire land</strong>.', 't2-b1-l3', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b1-l3">A thick white fog covered the <strong>entire land</strong>.</div>
+        </div>
+        </div>
+        <div class="lang-column es-col" lang="es">
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El hombre se detuvo a <strong>mirar la hora</strong>.', 't2-b1-l0', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b1-l0">El hombre se detuvo a <strong>mirar la hora</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Eran las <strong>nueve de la mañana</strong>.', 't2-b1-l1', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b1-l1">Eran las <strong>nueve de la mañana</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('No había <strong>sol</strong> en el cielo.', 't2-b1-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b1-l2">No había <strong>sol</strong> en el cielo.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Una niebla blanca cubría <strong>toda la tierra</strong>.', 't2-b1-l3', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b1-l3">Una niebla blanca cubría <strong>toda la tierra</strong>.</div>
+        </div>
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <div class="sentence-block">
+      <div class="anchor-header">
+        <div class="anchor-icon-wrapper" aria-hidden="true"><img src="assets/pictograms/5453.png" alt="extreme_cold" class="arasaac-icon" loading="lazy" /></div>
+        <div class="anchor-text-group">
+          <span class="anchor-tag">Tier 2 • Scene 3</span>
+          <span class="anchor-concept">Extreme Cold (-50°) / Frío extremo (-50 grados)</span>
+        </div>
+      </div>
+      <div class="clinical-alert">⚠️ Sensory Landmark: Ice crackling in mid-air</div>
+      <div class="reading-grid">
+        <div class="lang-column en-col" lang="en">
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The man spat into the <strong>freezing air</strong>.', 't2-b2-l0', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b2-l0">The man spat into the <strong>freezing air</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('There was a sharp <strong>crackling noise</strong>.', 't2-b2-l1', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b2-l1">There was a sharp <strong>crackling noise</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('His spit <strong>turned to ice</strong> in mid-air.', 't2-b2-l2', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b2-l2">His spit <strong>turned to ice</strong> in mid-air.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('He knew the cold was <strong>fifty degrees below zero</strong>.', 't2-b2-l3', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b2-l3">He knew the cold was <strong>fifty degrees below zero</strong>.</div>
+        </div>
+        </div>
+        <div class="lang-column es-col" lang="es">
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El hombre escupió en el <strong>aire congelado</strong>.', 't2-b2-l0', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b2-l0">El hombre escupió en el <strong>aire congelado</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Hubo un sonido <strong>seco y crujiente</strong>.', 't2-b2-l1', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b2-l1">Hubo un sonido <strong>seco y crujiente</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('La saliva <strong>se convirtió en hielo</strong> en el aire.', 't2-b2-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b2-l2">La saliva <strong>se convirtió en hielo</strong> en el aire.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Él supo que el frío era de <strong>cincuenta grados bajo cero</strong>.', 't2-b2-l3', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b2-l3">Él supo que el frío era de <strong>cincuenta grados bajo cero</strong>.</div>
+        </div>
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <div class="sentence-block">
+      <div class="anchor-header">
+        <div class="anchor-icon-wrapper" aria-hidden="true"><img src="assets/pictograms/2838.png" alt="husky_wolf_dog" class="arasaac-icon" loading="lazy" /></div>
+        <div class="anchor-text-group">
+          <span class="anchor-tag">Tier 2 • Scene 4</span>
+          <span class="anchor-concept">The Husky Wolf-Dog / El perro husky</span>
+        </div>
+      </div>
+      
+      <div class="reading-grid">
+        <div class="lang-column en-col" lang="en">
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('A large dog walked <strong>behind the man</strong>.', 't2-b3-l0', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b3-l0">A large dog walked <strong>behind the man</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The dog was a <strong>husky wolf-dog</strong>.', 't2-b3-l1', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b3-l1">The dog was a <strong>husky wolf-dog</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The dog was <strong>afraid of the terrible cold</strong>.', 't2-b3-l2', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b3-l2">The dog was <strong>afraid of the terrible cold</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The animal knew it was <strong>too cold to travel</strong>.', 't2-b3-l3', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b3-l3">The animal knew it was <strong>too cold to travel</strong>.</div>
+        </div>
+        </div>
+        <div class="lang-column es-col" lang="es">
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Un perro grande caminaba <strong>detrás del hombre</strong>.', 't2-b3-l0', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b3-l0">Un perro grande caminaba <strong>detrás del hombre</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El perro era un <strong>husky cruzado con lobo</strong>.', 't2-b3-l1', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b3-l1">El perro era un <strong>husky cruzado con lobo</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El animal tenía <strong>miedo del frío extremo</strong>.', 't2-b3-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b3-l2">El animal tenía <strong>miedo del frío extremo</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El perro sabía que era <strong>peligroso viajar</strong>.', 't2-b3-l3', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b3-l3">El perro sabía que era <strong>peligroso viajar</strong>.</div>
+        </div>
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <div class="sentence-block">
+      <div class="anchor-header">
+        <div class="anchor-icon-wrapper" aria-hidden="true"><img src="assets/pictograms/25315.png" alt="danger" class="arasaac-icon" loading="lazy" /></div>
+        <div class="anchor-text-group">
+          <span class="anchor-tag">Tier 2 • Scene 5</span>
+          <span class="anchor-concept">Hidden Water Traps / Los manantiales ocultos</span>
+        </div>
+      </div>
+      
+      <div class="reading-grid">
+        <div class="lang-column en-col" lang="en">
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The man walked along a <strong>frozen creek</strong>.', 't2-b4-l0', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b4-l0">The man walked along a <strong>frozen creek</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('Hidden water ran under the <strong>soft snow</strong>.', 't2-b4-l1', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b4-l1">Hidden water ran under the <strong>soft snow</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The deep pools were <strong>dangerous traps</strong>.', 't2-b4-l2', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b4-l2">The deep pools were <strong>dangerous traps</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('He watched the snow with <strong>great care</strong>.', 't2-b4-l3', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b4-l3">He watched the snow with <strong>great care</strong>.</div>
+        </div>
+        </div>
+        <div class="lang-column es-col" lang="es">
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El hombre caminaba junto al <strong>arroyo helado</strong>.', 't2-b4-l0', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b4-l0">El hombre caminaba junto al <strong>arroyo helado</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El agua oculta corría bajo la <strong>nieve suave</strong>.', 't2-b4-l1', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b4-l1">El agua oculta corría bajo la <strong>nieve suave</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Las pozas de agua eran <strong>trampas peligrosas</strong>.', 't2-b4-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b4-l2">Las pozas de agua eran <strong>trampas peligrosas</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Él miraba la nieve con <strong>mucho cuidado</strong>.', 't2-b4-l3', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b4-l3">Él miraba la nieve con <strong>mucho cuidado</strong>.</div>
+        </div>
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <div class="sentence-block">
+      <div class="anchor-header">
+        <div class="anchor-icon-wrapper" aria-hidden="true"><img src="assets/pictograms/2494.png" alt="boots" class="arasaac-icon" loading="lazy" /></div>
+        <div class="anchor-text-group">
+          <span class="anchor-tag">Tier 2 • Scene 6</span>
+          <span class="anchor-concept">The Dog Tests the Ice / El perro prueba el hielo</span>
+        </div>
+      </div>
+      
+      <div class="reading-grid">
+        <div class="lang-column en-col" lang="en">
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The man forced the dog to <strong>walk ahead</strong>.', 't2-b5-l0', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b5-l0">The man forced the dog to <strong>walk ahead</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The dog fell through a <strong>sheet of ice</strong>.', 't2-b5-l1', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b5-l1">The dog fell through a <strong>sheet of ice</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The animal wet its <strong>legs and paws</strong>.', 't2-b5-l2', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b5-l2">The animal wet its <strong>legs and paws</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('It bit the ice off between its <strong>toes</strong>.', 't2-b5-l3', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b5-l3">It bit the ice off between its <strong>toes</strong>.</div>
+        </div>
+        </div>
+        <div class="lang-column es-col" lang="es">
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El hombre obligó al perro a <strong>caminar adelante</strong>.', 't2-b5-l0', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b5-l0">El hombre obligó al perro a <strong>caminar adelante</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El perro cayó en una <strong>capa de hielo</strong>.', 't2-b5-l1', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b5-l1">El perro cayó en una <strong>capa de hielo</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El animal se mojó las <strong>patas</strong>.', 't2-b5-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b5-l2">El animal se mojó las <strong>patas</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El perro mordió el hielo entre sus <strong>dedos</strong>.', 't2-b5-l3', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b5-l3">El perro mordió el hielo entre sus <strong>dedos</strong>.</div>
+        </div>
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <div class="sentence-block">
+      <div class="anchor-header">
+        <div class="anchor-icon-wrapper" aria-hidden="true"><img src="assets/pictograms/2494.png" alt="boots" class="arasaac-icon" loading="lazy" /></div>
+        <div class="anchor-text-group">
+          <span class="anchor-tag">Tier 2 • Scene 7</span>
+          <span class="anchor-concept">The Boots Breakthrough / Las botas en el agua</span>
+        </div>
+      </div>
+      <div class="clinical-alert">⚠️ High Risk: Wet feet require an immediate fire</div>
+      <div class="reading-grid">
+        <div class="lang-column en-col" lang="en">
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The man stepped on a <strong>patch of soft snow</strong>.', 't2-b6-l0', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b6-l0">The man stepped on a <strong>patch of soft snow</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('He broke through the <strong>hidden ice</strong>.', 't2-b6-l1', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b6-l1">He broke through the <strong>hidden ice</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The freezing water soaked his <strong>boots and socks</strong>.', 't2-b6-l2', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b6-l2">The freezing water soaked his <strong>boots and socks</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('He was angry because he had to <strong>stop and dry off</strong>.', 't2-b6-l3', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b6-l3">He was angry because he had to <strong>stop and dry off</strong>.</div>
+        </div>
+        </div>
+        <div class="lang-column es-col" lang="es">
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El hombre pisó una <strong>zona de nieve blanda</strong>.', 't2-b6-l0', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b6-l0">El hombre pisó una <strong>zona de nieve blanda</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Él rompió el <strong>hielo oculto</strong>.', 't2-b6-l1', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b6-l1">Él rompió el <strong>hielo oculto</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El agua congelada mojó sus <strong>botas y calcetines</strong>.', 't2-b6-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b6-l2">El agua congelada mojó sus <strong>botas y calcetines</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Él se enojó porque debía <strong>parar a secarse</strong>.', 't2-b6-l3', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b6-l3">Él se enojó porque debía <strong>parar a secarse</strong>.</div>
+        </div>
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <div class="sentence-block">
+      <div class="anchor-header">
+        <div class="anchor-icon-wrapper" aria-hidden="true"><img src="assets/pictograms/2341.png" alt="fire" class="arasaac-icon" loading="lazy" /></div>
+        <div class="anchor-text-group">
+          <span class="anchor-tag">Tier 2 • Scene 8</span>
+          <span class="anchor-concept">Building the Life Fire / Encender el fuego</span>
+        </div>
+      </div>
+      
+      <div class="reading-grid">
+        <div class="lang-column en-col" lang="en">
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('He built a fire under a <strong>large pine tree</strong>.', 't2-b7-l0', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b7-l0">He built a fire under a <strong>large pine tree</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('He gathered dry <strong>grass and pine needles</strong>.', 't2-b7-l1', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b7-l1">He gathered dry <strong>grass and pine needles</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('A match produced a small <strong>warm flame</strong>.', 't2-b7-l2', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b7-l2">A match produced a small <strong>warm flame</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('He added larger twigs and the <strong>fire grew strong</strong>.', 't2-b7-l3', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b7-l3">He added larger twigs and the <strong>fire grew strong</strong>.</div>
+        </div>
+        </div>
+        <div class="lang-column es-col" lang="es">
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Él hizo una fogata debajo de un <strong>gran pino</strong>.', 't2-b7-l0', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b7-l0">Él hizo una fogata debajo de un <strong>gran pino</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Juntó pasto seco y <strong>hojas de pino</strong>.', 't2-b7-l1', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b7-l1">Juntó pasto seco y <strong>hojas de pino</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Un fósforo encendió una pequeña <strong>llama tibia</strong>.', 't2-b7-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b7-l2">Un fósforo encendió una pequeña <strong>llama tibia</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Añadió ramas más grandes y el <strong>fuego creció fuerte</strong>.', 't2-b7-l3', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b7-l3">Añadió ramas más grandes y el <strong>fuego creció fuerte</strong>.</div>
+        </div>
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <div class="sentence-block">
+      <div class="anchor-header">
+        <div class="anchor-icon-wrapper" aria-hidden="true"><img src="assets/pictograms/5453.png" alt="extreme_cold" class="arasaac-icon" loading="lazy" /></div>
+        <div class="anchor-text-group">
+          <span class="anchor-tag">Tier 2 • Scene 9</span>
+          <span class="anchor-concept">The Snow Avalanche / La nieve apaga el fuego</span>
+        </div>
+      </div>
+      <div class="clinical-alert">⚠️ Catastrophic Event: Fire extinguished by snow</div>
+      <div class="reading-grid">
+        <div class="lang-column en-col" lang="en">
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The tree branches held a heavy <strong>pile of snow</strong>.', 't2-b8-l0', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b8-l0">The tree branches held a heavy <strong>pile of snow</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The man pulled twigs and <strong>shook the tree</strong>.', 't2-b8-l1', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b8-l1">The man pulled twigs and <strong>shook the tree</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('A heavy load of snow fell <strong>onto the fire</strong>.', 't2-b8-l2', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b8-l2">A heavy load of snow fell <strong>onto the fire</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The fire was completely <strong>put out</strong>.', 't2-b8-l3', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b8-l3">The fire was completely <strong>put out</strong>.</div>
+        </div>
+        </div>
+        <div class="lang-column es-col" lang="es">
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Las ramas del pino tenían una <strong>carga de nieve</strong>.', 't2-b8-l0', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b8-l0">Las ramas del pino tenían una <strong>carga de nieve</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El hombre jaló ramas y <strong>sacudió el árbol</strong>.', 't2-b8-l1', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b8-l1">El hombre jaló ramas y <strong>sacudió el árbol</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Un montón de nieve cayó <strong>sobre el fuego</strong>.', 't2-b8-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b8-l2">Un montón de nieve cayó <strong>sobre el fuego</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El fuego se apagó por <strong>completo</strong>.', 't2-b8-l3', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b8-l3">El fuego se apagó por <strong>completo</strong>.</div>
+        </div>
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <div class="sentence-block">
+      <div class="anchor-header">
+        <div class="anchor-icon-wrapper" aria-hidden="true"><img src="assets/pictograms/2838.png" alt="husky_wolf_dog" class="arasaac-icon" loading="lazy" /></div>
+        <div class="anchor-text-group">
+          <span class="anchor-tag">Tier 2 • Scene 10</span>
+          <span class="anchor-concept">The Final Sleep / El sueño final y la salvación</span>
+        </div>
+      </div>
+      
+      <div class="reading-grid">
+        <div class="lang-column en-col" lang="en">
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('His fingers were frozen like <strong>blocks of wood</strong>.', 't2-b9-l0', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b9-l0">His fingers were frozen like <strong>blocks of wood</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('He could not light a <strong>single match</strong>.', 't2-b9-l1', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b9-l1">He could not light a <strong>single match</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The man sat in the snow and fell <strong>asleep</strong>.', 't2-b9-l2', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b9-l2">The man sat in the snow and fell <strong>asleep</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The dog smelled death and ran to the <strong>camp</strong>.', 't2-b9-l3', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t2-b9-l3">The dog smelled death and ran to the <strong>camp</strong>.</div>
+        </div>
+        </div>
+        <div class="lang-column es-col" lang="es">
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Sus dedos estaban duros como <strong>pedazos de madera</strong>.', 't2-b9-l0', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b9-l0">Sus dedos estaban duros como <strong>pedazos de madera</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Él no pudo encender ningún <strong>otro fósforo</strong>.', 't2-b9-l1', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b9-l1">Él no pudo encender ningún <strong>otro fósforo</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El hombre se sentó en la nieve y se quedó <strong>dormido</strong>.', 't2-b9-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b9-l2">El hombre se sentó en la nieve y se quedó <strong>dormido</strong>.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El perro olió la muerte y corrió al <strong>campamento</strong>.', 't2-b9-l3', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t2-b9-l3">El perro olió la muerte y corrió al <strong>campamento</strong>.</div>
+        </div>
+        </div>
+      </div>
+      
+    </div>
+    
+      </div>
+
+      <div id="content-tier-3" class="tier-view" style="display: none;">
+        
+    <div class="sentence-block">
+      <div class="anchor-header">
+        <div class="anchor-icon-wrapper" aria-hidden="true">🌲</div>
+        <div class="anchor-text-group">
+          <span class="anchor-tag">Tier 3 • Chapter 1</span>
+          <span class="anchor-concept">The Yukon Trail (Prose)</span>
+        </div>
+      </div>
+      
+      <div class="reading-grid">
+        <div class="lang-column en-col" lang="en">
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('Day had broken cold and gray, exceedingly cold and gray, in the deep Yukon wilderness.', 't3-b0-l0', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t3-b0-l0">Day had broken cold and gray, exceedingly cold and gray, in the deep Yukon wilderness.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('A solitary traveler turned aside from the main trail and climbed the steep earth bank into the pine forest.', 't3-b0-l1', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t3-b0-l1">A solitary traveler turned aside from the main trail and climbed the steep earth bank into the pine forest.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('He paused for breath at the top and checked his watch.', 't3-b0-l2', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t3-b0-l2">He paused for breath at the top and checked his watch.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('It was nine o\'clock in the morning, and there was no sun nor hint of sun in the clear, empty sky.', 't3-b0-l3', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t3-b0-l3">It was nine o'clock in the morning, and there was no sun nor hint of sun in the clear, empty sky.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('A thick white gloom hung over the face of the frozen world.', 't3-b0-l4', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t3-b0-l4">A thick white gloom hung over the face of the frozen world.</div>
+        </div>
+        </div>
+        <div class="lang-column es-col" lang="es">
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El día había comenzado frío y gris, sumamente frío y gris, en el desierto blanco de Yukón.', 't3-b0-l0', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t3-b0-l0">El día había comenzado frío y gris, sumamente frío y gris, en el desierto blanco de Yukón.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Un viajero solitario se desvió del camino principal y subió una pendiente de tierra para entrar al bosque de pinos.', 't3-b0-l1', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t3-b0-l1">Un viajero solitario se desvió del camino principal y subió una pendiente de tierra para entrar al bosque de pinos.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Se detuvo en la cima a tomar aire y miró su reloj.', 't3-b0-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t3-b0-l2">Se detuvo en la cima a tomar aire y miró su reloj.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Eran las nueve de la mañana y no había rastro de sol en el cielo despejado y vacío.', 't3-b0-l3', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t3-b0-l3">Eran las nueve de la mañana y no había rastro de sol en el cielo despejado y vacío.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Una densa niebla blanca cubría por completo la tierra congelada.', 't3-b0-l4', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t3-b0-l4">Una densa niebla blanca cubría por completo la tierra congelada.</div>
+        </div>
+        </div>
+      </div>
+      
+        <details class="chapter-recap-dropdown">
+          <summary class="recap-summary">
+            <span class="recap-title-en">🧠 Chapter Memory Check (Tap to expand)</span>
+            <span class="recap-title-es">🧠 Repaso del Capítulo (Tocar para ver)</span>
+          </summary>
+          <div class="recap-content-body">
+            <div lang="en">
+              <strong style="color: var(--accent-en); display: block; margin-bottom: 0.5rem;">Key Takeaways:</strong>
+              <ul class="recap-list"><li><strong>Setting:</strong> The Yukon forest at 9:00 AM in extreme cold.</li><li><strong>Atmosphere:</strong> Gray, sunless sky with pure unbroken snow.</li><li><strong>Action:</strong> A solitary traveler leaves the main trail into the pine woods.</li></ul>
+            </div>
+            <div lang="es" style="margin-top: 0.75rem;">
+              <strong style="color: var(--accent-es); display: block; margin-bottom: 0.5rem;">Puntos Principales:</strong>
+              <ul class="recap-list"><li><strong>Lugar:</strong> El bosque de Yukón a las 9:00 de la mañana con frío extremo.</li><li><strong>Ambiente:</strong> Cielo gris sin sol y nieve interminable.</li><li><strong>Acción:</strong> Un viajero solitario se desvía del camino hacia el bosque de pinos.</li></ul>
+            </div>
+          </div>
+        </details>
+        
+    </div>
+    
+
+    <div class="sentence-block">
+      <div class="anchor-header">
+        <div class="anchor-icon-wrapper" aria-hidden="true">🐺</div>
+        <div class="anchor-text-group">
+          <span class="anchor-tag">Tier 3 • Chapter 2</span>
+          <span class="anchor-concept">Extreme Cold & Animal Instinct</span>
+        </div>
+      </div>
+      
+      <div class="reading-grid">
+        <div class="lang-column en-col" lang="en">
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The man spat into the freezing air, and there was a sharp, dry crackle before it touched the snow.', 't3-b1-l0', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t3-b1-l0">The man spat into the freezing air, and there was a sharp, dry crackle before it touched the snow.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('He knew that at fifty degrees below zero spittle crackled on the snow, but this had crackled in mid-air.', 't3-b1-l1', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t3-b1-l1">He knew that at fifty degrees below zero spittle crackled on the snow, but this had crackled in mid-air.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('At the man\'s heels trotted a large native husky dog, gray-coated and looking like a wild timber wolf.', 't3-b1-l2', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t3-b1-l2">At the man's heels trotted a large native husky dog, gray-coated and looking like a wild timber wolf.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The animal was depressed by the tremendous cold and knew by instinct that it was too dangerous to travel.', 't3-b1-l3', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t3-b1-l3">The animal was depressed by the tremendous cold and knew by instinct that it was too dangerous to travel.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('In reality, the cold was seventy-five degrees below zero, and danger was everywhere.', 't3-b1-l4', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t3-b1-l4">In reality, the cold was seventy-five degrees below zero, and danger was everywhere.</div>
+        </div>
+        </div>
+        <div class="lang-column es-col" lang="es">
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El hombre escupió en el aire congelado y la saliva produjo un chasquido seco antes de tocar la nieve.', 't3-b1-l0', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t3-b1-l0">El hombre escupió en el aire congelado y la saliva produjo un chasquido seco antes de tocar la nieve.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Él sabía que a cincuenta bajo cero la saliva tronaba en la nieve, pero esta había tronado en el aire.', 't3-b1-l1', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t3-b1-l1">Él sabía que a cincuenta bajo cero la saliva tronaba en la nieve, pero esta había tronado en el aire.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Detrás del hombre caminaba un perro grande, un husky con pelo gris parecido a un lobo salvaje.', 't3-b1-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t3-b1-l2">Detrás del hombre caminaba un perro grande, un husky con pelo gris parecido a un lobo salvaje.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El animal estaba desanimado por el frío tremendo y su instinto le advertía que era peligroso viajar.', 't3-b1-l3', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t3-b1-l3">El animal estaba desanimado por el frío tremendo y su instinto le advertía que era peligroso viajar.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('En realidad, la temperatura era de setenta y cinco grados bajo cero y el peligro estaba en todas partes.', 't3-b1-l4', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t3-b1-l4">En realidad, la temperatura era de setenta y cinco grados bajo cero y el peligro estaba en todas partes.</div>
+        </div>
+        </div>
+      </div>
+      
+        <details class="chapter-recap-dropdown">
+          <summary class="recap-summary">
+            <span class="recap-title-en">🧠 Chapter Memory Check (Tap to expand)</span>
+            <span class="recap-title-es">🧠 Repaso del Capítulo (Tocar para ver)</span>
+          </summary>
+          <div class="recap-content-body">
+            <div lang="en">
+              <strong style="color: var(--accent-en); display: block; margin-bottom: 0.5rem;">Key Takeaways:</strong>
+              <ul class="recap-list"><li><strong>The Real Temperature:</strong> 75 degrees below zero (spit freezes in mid-air).</li><li><strong>The Dog's Instinct:</strong> The wolf-dog knows it is too cold and dangerous to travel.</li><li><strong>Human Judgment:</strong> The man ignores the warning signs and continues walking.</li></ul>
+            </div>
+            <div lang="es" style="margin-top: 0.75rem;">
+              <strong style="color: var(--accent-es); display: block; margin-bottom: 0.5rem;">Puntos Principales:</strong>
+              <ul class="recap-list"><li><strong>La temperatura real:</strong> 75 grados bajo cero (la saliva se congela en el aire).</li><li><strong>El instinto del perro:</strong> El animal sabe que viajar con este frío es mortal.</li><li><strong>El juicio del hombre:</strong> El viajero ignora las señales y sigue caminando.</li></ul>
+            </div>
+          </div>
+        </details>
+        
+    </div>
+    
+
+    <div class="sentence-block">
+      <div class="anchor-header">
+        <div class="anchor-icon-wrapper" aria-hidden="true">🥾</div>
+        <div class="anchor-text-group">
+          <span class="anchor-tag">Tier 3 • Chapter 3</span>
+          <span class="anchor-concept">Hidden Springs & Wet Boots</span>
+        </div>
+      </div>
+      <div class="clinical-alert">⚠️ Crisis: Wet feet in seventy-five below</div>
+      <div class="reading-grid">
+        <div class="lang-column en-col" lang="en">
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The man continued walking along the frozen bed of Henderson Creek.', 't3-b2-l0', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t3-b2-l0">The man continued walking along the frozen bed of Henderson Creek.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('He knew that unfrozen mountain springs flowed beneath the snow, creating deadly water traps.', 't3-b2-l1', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t3-b2-l1">He knew that unfrozen mountain springs flowed beneath the snow, creating deadly water traps.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The man forced the dog to walk ahead, and the animal broke through a crust of ice, wetting its legs.', 't3-b2-l2', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t3-b2-l2">The man forced the dog to walk ahead, and the animal broke through a crust of ice, wetting its legs.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('A mile farther, the man himself stepped into a hidden spring and soaked his boots halfway to his knees.', 't3-b2-l3', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t3-b2-l3">A mile farther, the man himself stepped into a hidden spring and soaked his boots halfway to his knees.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('He cursed his bad luck, knowing he had to build a fire immediately to dry his feet or lose them to frostbite.', 't3-b2-l4', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t3-b2-l4">He cursed his bad luck, knowing he had to build a fire immediately to dry his feet or lose them to frostbite.</div>
+        </div>
+        </div>
+        <div class="lang-column es-col" lang="es">
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El hombre continuó caminando junto al cauce congelado del arroyo.', 't3-b2-l0', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t3-b2-l0">El hombre continuó caminando junto al cauce congelado del arroyo.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Él sabía que manantiales ocultos corrían bajo la nieve, creando peligrosas trampas de agua.', 't3-b2-l1', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t3-b2-l1">Él sabía que manantiales ocultos corrían bajo la nieve, creando peligrosas trampas de agua.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El hombre obligó al perro a caminar adelante, y el animal rompió una capa de hielo y se mojó las patas.', 't3-b2-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t3-b2-l2">El hombre obligó al perro a caminar adelante, y el animal rompió una capa de hielo y se mojó las patas.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Una milla después, el hombre pisó una trampa oculta y el agua helada le cubrió las botas hasta las rodillas.', 't3-b2-l3', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t3-b2-l3">Una milla después, el hombre pisó una trampa oculta y el agua helada le cubrió las botas hasta las rodillas.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Maldijo su mala suerte, sabiendo que debía encender un fuego de inmediato para secarse los pies antes de congelarse.', 't3-b2-l4', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t3-b2-l4">Maldijo su mala suerte, sabiendo que debía encender un fuego de inmediato para secarse los pies antes de congelarse.</div>
+        </div>
+        </div>
+      </div>
+      
+        <details class="chapter-recap-dropdown">
+          <summary class="recap-summary">
+            <span class="recap-title-en">🧠 Chapter Memory Check (Tap to expand)</span>
+            <span class="recap-title-es">🧠 Repaso del Capítulo (Tocar para ver)</span>
+          </summary>
+          <div class="recap-content-body">
+            <div lang="en">
+              <strong style="color: var(--accent-en); display: block; margin-bottom: 0.5rem;">Key Takeaways:</strong>
+              <ul class="recap-list"><li><strong>The Water Traps:</strong> Warm springs flow beneath the snow without freezing.</li><li><strong>The Accident:</strong> The man falls through hidden ice, soaking his boots to his knees.</li><li><strong>Survival Rule:</strong> Wet feet require building an immediate fire to prevent losing toes.</li></ul>
+            </div>
+            <div lang="es" style="margin-top: 0.75rem;">
+              <strong style="color: var(--accent-es); display: block; margin-bottom: 0.5rem;">Puntos Principales:</strong>
+              <ul class="recap-list"><li><strong>Las trampas de agua:</strong> Manantiales corren bajo la nieve sin congelarse.</li><li><strong>El accidente:</strong> El hombre pisa nieve blanda y se empapa las botas hasta las rodillas.</li><li><strong>Regla de supervivencia:</strong> Pies mojados exigen encender fuego de inmediato para no congelarse.</li></ul>
+            </div>
+          </div>
+        </details>
+        
+    </div>
+    
+
+    <div class="sentence-block">
+      <div class="anchor-header">
+        <div class="anchor-icon-wrapper" aria-hidden="true">🔥</div>
+        <div class="anchor-text-group">
+          <span class="anchor-tag">Tier 3 • Chapter 4</span>
+          <span class="anchor-concept">The Life Fire & The Avalanche</span>
+        </div>
+      </div>
+      <div class="clinical-alert">⚠️ Catastrophe: Fire smothered by snow</div>
+      <div class="reading-grid">
+        <div class="lang-column en-col" lang="en">
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The man worked carefully to build a fire beneath the sheltering boughs of a large spruce pine.', 't3-b3-l0', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t3-b3-l0">The man worked carefully to build a fire beneath the sheltering boughs of a large spruce pine.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('He lit a dry curl of birch bark with a sulfur match and nurtured a small, crackling flame.', 't3-b3-l1', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t3-b3-l1">He lit a dry curl of birch bark with a sulfur match and nurtured a small, crackling flame.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The fire grew strong, and the man felt safe and triumphant over the deadly cold.', 't3-b3-l2', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t3-b3-l2">The fire grew strong, and the man felt safe and triumphant over the deadly cold.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('Then disaster struck: the tree branches were overloaded with snow from weeks of winter storms.', 't3-b3-l3', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t3-b3-l3">Then disaster struck: the tree branches were overloaded with snow from weeks of winter storms.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('Each time he pulled a twig, the tree shook, until a huge avalanche of snow fell directly onto the fire and smothered it into smoke.', 't3-b3-l4', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t3-b3-l4">Each time he pulled a twig, the tree shook, until a huge avalanche of snow fell directly onto the fire and smothered it into smoke.</div>
+        </div>
+        </div>
+        <div class="lang-column es-col" lang="es">
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El hombre trabajó con cuidado para hacer una fogata debajo de las ramas de un gran pino.', 't3-b3-l0', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t3-b3-l0">El hombre trabajó con cuidado para hacer una fogata debajo de las ramas de un gran pino.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Encendió un pedazo de corteza seca con un fósforo y cuidó una pequeña llama viva.', 't3-b3-l1', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t3-b3-l1">Encendió un pedazo de corteza seca con un fósforo y cuidó una pequeña llama viva.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El fuego creció con fuerza y el hombre se sintió a salvo del frío mortal.', 't3-b3-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t3-b3-l2">El fuego creció con fuerza y el hombre se sintió a salvo del frío mortal.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Pero ocurrió el desastre: las ramas del pino estaban cargadas de nieve acumulada durante semanas.', 't3-b3-l3', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t3-b3-l3">Pero ocurrió el desastre: las ramas del pino estaban cargadas de nieve acumulada durante semanas.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Cada vez que él jalaba una ramita, el árbol se sacudía, hasta que un montón de nieve cayó sobre la fogata y la apagó por completo.', 't3-b3-l4', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t3-b3-l4">Cada vez que él jalaba una ramita, el árbol se sacudía, hasta que un montón de nieve cayó sobre la fogata y la apagó por completo.</div>
+        </div>
+        </div>
+      </div>
+      
+        <details class="chapter-recap-dropdown">
+          <summary class="recap-summary">
+            <span class="recap-title-en">🧠 Chapter Memory Check (Tap to expand)</span>
+            <span class="recap-title-es">🧠 Repaso del Capítulo (Tocar para ver)</span>
+          </summary>
+          <div class="recap-content-body">
+            <div lang="en">
+              <strong style="color: var(--accent-en); display: block; margin-bottom: 0.5rem;">Key Takeaways:</strong>
+              <ul class="recap-list"><li><strong>The First Fire:</strong> The man successfully starts a warm fire under a large pine.</li><li><strong>The Critical Mistake:</strong> Pulling twigs from the tree disturbs the heavy snow on the branches.</li><li><strong>The Tragedy:</strong> A small avalanche falls from the boughs and smothers the fire.</li></ul>
+            </div>
+            <div lang="es" style="margin-top: 0.75rem;">
+              <strong style="color: var(--accent-es); display: block; margin-bottom: 0.5rem;">Puntos Principales:</strong>
+              <ul class="recap-list"><li><strong>El primer fuego:</strong> El hombre logra encender una buena fogata bajo un pino grande.</li><li><strong>El grave error:</strong> Jalar ramas sacude la nieve acumulada en las partes altas del árbol.</li><li><strong>La tragedia:</strong> Una avalancha de nieve cae sobre la fogata y la apaga por completo.</li></ul>
+            </div>
+          </div>
+        </details>
+        
+    </div>
+    
+
+    <div class="sentence-block">
+      <div class="anchor-header">
+        <div class="anchor-icon-wrapper" aria-hidden="true">📖</div>
+        <div class="anchor-text-group">
+          <span class="anchor-tag">Tier 3 • Chapter 5</span>
+          <span class="anchor-concept">The Final Run & Eternal Rest</span>
+        </div>
+      </div>
+      
+      <div class="reading-grid">
+        <div class="lang-column en-col" lang="en">
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The man panicked as the cold crept into his bones, and his fingers turned into frozen blocks of wood.', 't3-b4-l0', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t3-b4-l0">The man panicked as the cold crept into his bones, and his fingers turned into frozen blocks of wood.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('He struck the entire bundle of seventy matches at once against his leg, but his numb hands dropped them into the snow.', 't3-b4-l1', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t3-b4-l1">He struck the entire bundle of seventy matches at once against his leg, but his numb hands dropped them into the snow.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('In a final burst of fear, he ran wildly down the trail, but his freezing legs gave out and he collapsed.', 't3-b4-l2', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t3-b4-l2">In a final burst of fear, he ran wildly down the trail, but his freezing legs gave out and he collapsed.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('A comfortable warmth came over him, and he sat against a pine tree, drifting into a peaceful, eternal sleep.', 't3-b4-l3', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t3-b4-l3">A comfortable warmth came over him, and he sat against a pine tree, drifting into a peaceful, eternal sleep.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn en" onclick="playSpeech('The dog sat and waited, smelled the scent of death on the quiet body, and turned to trot toward the warm fires of the camp.', 't3-b4-l4', 'en-US')" title="Listen in English" aria-label="Listen in English">🔊</button>
+          <div class="idea-unit en" data-sync="t3-b4-l4">The dog sat and waited, smelled the scent of death on the quiet body, and turned to trot toward the warm fires of the camp.</div>
+        </div>
+        </div>
+        <div class="lang-column es-col" lang="es">
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El hombre sintió pánico cuando el frío se metió en su cuerpo y sus dedos se endurecieron como pedazos de madera.', 't3-b4-l0', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t3-b4-l0">El hombre sintió pánico cuando el frío se metió en su cuerpo y sus dedos se endurecieron como pedazos de madera.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Frotó todo el paquete de setenta fósforos contra su pierna, pero sus manos sin fuerza los dejaron caer a la nieve.', 't3-b4-l1', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t3-b4-l1">Frotó todo el paquete de setenta fósforos contra su pierna, pero sus manos sin fuerza los dejaron caer a la nieve.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Desesperado, corrió por el sendero intentando entrar en calor, pero sus piernas congeladas fallaron y cayó al suelo.', 't3-b4-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t3-b4-l2">Desesperado, corrió por el sendero intentando entrar en calor, pero sus piernas congeladas fallaron y cayó al suelo.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('Una agradable sensación de calor lo envolvió, y se sentó junto a un pino, quedándose en un sueño tranquilo y eterno.', 't3-b4-l3', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t3-b4-l3">Una agradable sensación de calor lo envolvió, y se sentó junto a un pino, quedándose en un sueño tranquilo y eterno.</div>
+        </div>
+        
+        <div class="unit-wrapper">
+          <button class="tts-btn es" onclick="playSpeech('El perro esperó sentado, olió la muerte en el cuerpo inmóvil y dio la vuelta para trotar hacia las fogatas del campamento.', 't3-b4-l4', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t3-b4-l4">El perro esperó sentado, olió la muerte en el cuerpo inmóvil y dio la vuelta para trotar hacia las fogatas del campamento.</div>
+        </div>
+        </div>
+      </div>
+      
+        <details class="chapter-recap-dropdown">
+          <summary class="recap-summary">
+            <span class="recap-title-en">🧠 Chapter Memory Check (Tap to expand)</span>
+            <span class="recap-title-es">🧠 Repaso del Capítulo (Tocar para ver)</span>
+          </summary>
+          <div class="recap-content-body">
+            <div lang="en">
+              <strong style="color: var(--accent-en); display: block; margin-bottom: 0.5rem;">Key Takeaways:</strong>
+              <ul class="recap-list"><li><strong>Frozen Hands:</strong> His fingers go completely numb; he burns his flesh lighting 70 matches at once.</li><li><strong>The Panic Run:</strong> He runs desperately to restore circulation, but his frozen legs give out.</li><li><strong>Peaceful Sleep:</strong> The man drifts into a painless final sleep; the dog survives and trots toward the camp.</li></ul>
+            </div>
+            <div lang="es" style="margin-top: 0.75rem;">
+              <strong style="color: var(--accent-es); display: block; margin-bottom: 0.5rem;">Puntos Principales:</strong>
+              <ul class="recap-list"><li><strong>Manos congeladas:</strong> Los dedos pierden sensibilidad; quema su piel encendiendo 70 fósforos a la vez.</li><li><strong>La carrera desesperada:</strong> Corre para recuperar calor, pero sus piernas congeladas colapsan.</li><li><strong>El descanso final:</strong> El hombre se duerme en paz; el perro sobrevive y busca el calor del campamento.</li></ul>
+            </div>
+          </div>
+        </details>
+        
+    </div>
+    
+      </div>
+    </main>
+
+    <footer style="margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border-card); font-size: 0.75rem; color: var(--text-muted); text-align: center;">
+      Pictographic symbols used in this reader are property of the Government of Aragón and were created by Sergio Palao for 
+      <a href="http://www.arasaac.org" target="_blank" rel="noopener" style="color: inherit; font-weight: 700;">ARASAAC</a>, 
+      licensed under Creative Commons (BY-NC-SA). Adapted for clinical speech-language pathology research at Portland State University.
+    </footer>
+  </div>
+
+  <script>
+    function setSeverityTier(tierName) {
+      document.body.classList.remove('tier-1', 'tier-2', 'tier-3');
+      document.body.classList.add(tierName);
+
+      document.querySelectorAll('.tier-view').forEach(el => el.style.display = 'none');
+      document.getElementById('content-' + tierName).style.display = 'block';
+
+      ['tier-1', 'tier-2', 'tier-3'].forEach(t => {
+        const btn = document.getElementById('btn-' + t);
+        if (btn) btn.classList.toggle('is-active', t === tierName);
+      });
+    }
+
+    function setLanguageMode(mode) {
+      document.body.classList.remove('lang-en', 'lang-es', 'lang-both');
+      document.body.classList.add('lang-' + mode);
+
+      ['en', 'es', 'both'].forEach(m => {
+        const btn = document.getElementById('btn-lang-' + m);
+        if (btn) btn.classList.toggle('is-active', m === mode);
+      });
+    }
+
+    function setFontSize(sizeValue, buttonEl) {
+      document.documentElement.style.setProperty('--reader-font-size', sizeValue);
+      document.querySelectorAll('.a11y-group .a11y-btn').forEach(btn => {
+        if (['A', 'A+', 'A++'].includes(btn.innerText)) btn.classList.remove('is-active');
+      });
+      if (buttonEl) buttonEl.classList.add('is-active');
+    }
+
+    function toggleContrast() {
+      const body = document.body;
+      const toggleBtn = document.getElementById('contrast-toggle');
+      const isHighContrast = body.classList.toggle('high-contrast');
+      toggleBtn.setAttribute('aria-pressed', isHighContrast ? 'true' : 'false');
+      toggleBtn.classList.toggle('is-active', isHighContrast);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const units = document.querySelectorAll('.idea-unit');
+      units.forEach(unit => {
+        const syncId = unit.dataset.sync;
+        if (!syncId) return;
+
+        unit.addEventListener('mouseenter', () => {
+          document.querySelectorAll(`[data-sync="${syncId}"]`).forEach(el => el.classList.add('is-active'));
+        });
+        unit.addEventListener('mouseleave', () => {
+          document.querySelectorAll(`[data-sync="${syncId}"]`).forEach(el => el.classList.remove('is-active'));
+        });
+
+        unit.addEventListener('click', () => {
+          if (document.body.classList.contains('tier-3')) {
+            const lang = unit.classList.contains('en') ? 'en-US' : 'es-US';
+            playSpeech(unit.innerText, syncId, lang);
+          }
+        });
+      });
+    });
+
+    let availableVoices = [];
+
+    function updateBadge() {
+      const enVoice = getBestVoice('en');
+      const esVoice = getBestVoice('es');
+      const badge = document.getElementById('voice-status');
+      if (!badge) return;
+
+      const enName = enVoice ? `${enVoice.name} (${enVoice.lang})` : 'Default System Voice';
+      const esName = esVoice ? `${esVoice.name} (${esVoice.lang})` : 'Voz por defecto';
+
+      badge.innerHTML = `🎙️ <strong>EN (0.85x):</strong> ${enName} &nbsp;|&nbsp; <strong>ES (0.85x):</strong> ${esName}`;
+    }
+
+    function populateVoices() {
+      availableVoices = window.speechSynthesis.getVoices();
+      if (availableVoices.length > 0) updateBadge();
+    }
+
+    populateVoices();
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+      speechSynthesis.onvoiceschanged = populateVoices;
+    }
+
+    function getBestVoice(langPrefix) {
+      if (!availableVoices.length) availableVoices = window.speechSynthesis.getVoices();
+
+      if (langPrefix.startsWith('es')) {
+        return (
+          availableVoices.find(v => v.lang === 'es-MX' || v.name.toLowerCase().includes('mexico') || v.name.includes('Paulina')) ||
+          availableVoices.find(v => v.lang === 'es-US') ||
+          availableVoices.find(v => v.lang === 'es-419') ||
+          availableVoices.find(v => v.lang.startsWith('es')) ||
+          null
+        );
+      } else {
+        return (
+          availableVoices.find(v => v.lang === 'en-US' || v.name.includes('Samantha') || v.name.includes('US')) ||
+          availableVoices.find(v => v.lang.startsWith('en')) ||
+          null
+        );
+      }
+    }
+
+    function playSpeech(text, syncId, targetLang) {
+      if (!('speechSynthesis' in window)) {
+        alert('Web Speech API is not supported in this browser.');
+        return;
+      }
+
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.resume();
+
+      const cleanText = text.replace(/<[^>]*>/g, '').replace(/[—–-]/g, '').trim();
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.rate = 0.85;
+      utterance.pitch = 1.0;
+
+      const voice = getBestVoice(targetLang);
+      if (voice) {
+        utterance.voice = voice;
+        utterance.lang = voice.lang;
+      } else {
+        utterance.lang = targetLang;
+      }
+
+      const targetClass = targetLang.startsWith('en') ? '.idea-unit.en' : '.idea-unit.es';
+      const activeUnit = document.querySelector(`${targetClass}[data-sync="${syncId}"]`);
+
+      utterance.onstart = () => { if (activeUnit) activeUnit.classList.add('is-speaking'); };
+      utterance.onend = () => { if (activeUnit) activeUnit.classList.remove('is-speaking'); };
+      utterance.onerror = () => { if (activeUnit) activeUnit.classList.remove('is-speaking'); };
+
+      window.speechSynthesis.speak(utterance);
+    }
+  </script>
+</body>
+</html>
