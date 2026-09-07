@@ -1,3 +1,18 @@
+---
+title: "Bilingual Neurogenic Adaptation Rubric (BNAR)"
+version: "1.0-Clinical"
+author: "Perla Carlson, B.S., MS-SLP Candidate"
+institution: "Department of Speech & Hearing Sciences, Portland State University"
+copyright: "© 2026 Perla Carlson. All Rights Reserved."
+license: "Academic & Research Non-Commercial Distribution (PSU SPHR)"
+standards: "UNE 153101:2018; SCA™ (Kagan, 1998); Dual Coding Theory (Paivio, 1991)"
+---
+
+> **Notice of Intellectual Property:**  
+> The Bilingual Neurogenic Adaptation Rubric (BNAR), its clinical transformation domains, scoring rubrics, and adapted narrative corpora are the intellectual property of the author. Portland State University is granted non-exclusive rights for academic archiving and scholarly evaluation. All commercial rights, proprietary platform integrations, and derivative software developments remain reserved.
+
+---
+
 # Bilingual Neurogenic Adaptation Rubric (BNAR)
 **Proyecto Lectura Accesible: Dual-Language Literature Adaptation for Acquired Alexia & Aphasia**  
 *Department of Speech & Hearing Sciences | Portland State University*  
