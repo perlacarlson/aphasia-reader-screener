@@ -25,6 +25,119 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Proyecto Lectura Accesible | Jack London — To Build a Fire</title>
   <style>
+  /* Guide Trigger Button */
+.guide-trigger-btn {
+  margin-top: 0.75rem;
+  background-color: var(--btn-bg);
+  border: 2px solid var(--accent-en);
+  color: var(--accent-en);
+}
+
+/* Accessible Native Dialog Modal */
+.clinical-modal {
+  border: 2px solid var(--border-card);
+  border-radius: 16px;
+  padding: 0;
+  max-width: 680px;
+  width: 90vw;
+  background-color: var(--bg-card);
+  color: var(--text-main);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+.clinical-modal::backdrop {
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(2px);
+}
+
+body.high-contrast .clinical-modal {
+  border-color: var(--accent-en);
+  box-shadow: 0 0 20px rgba(52, 211, 153, 0.2);
+}
+
+.modal-wrapper {
+  padding: 1.5rem;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--border-card);
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.modal-header h2 {
+  font-size: 1.25rem;
+  margin: 0;
+  color: var(--text-main);
+}
+
+.modal-close-btn {
+  min-width: 44px;
+  min-height: 44px;
+  background: transparent;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: var(--text-muted);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close-btn:hover {
+  background-color: var(--btn-bg);
+  color: var(--text-main);
+}
+
+.modal-body {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  max-height: 65vh;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.modal-intro {
+  margin-top: 0;
+  color: var(--text-muted);
+  border-left: 3px solid var(--accent-en);
+  padding-left: 0.75rem;
+}
+
+.modal-section {
+  margin-top: 1.25rem;
+}
+
+.modal-section h3 {
+  font-size: 1rem;
+  margin: 0 0 0.4rem 0;
+  color: var(--accent-en);
+}
+
+.modal-list {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.modal-list li {
+  margin-bottom: 0.5rem;
+}
+
+.modal-note {
+  margin: 0;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 2px solid var(--border-card);
+  padding-top: 1rem;
+  margin-top: 1.25rem;
+}
     :root {
       --reader-font-size: 19px;
       --reader-line-height: 1.85;
@@ -545,8 +658,54 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </head>
 <body class="tier-2 lang-both">
   <div class="container">
+  <!-- Clinical Quick-Start Guide Modal -->
+<dialog id="quickstart-modal" class="clinical-modal" aria-labelledby="modal-title">
+  <div class="modal-wrapper">
+    <div class="modal-header">
+      <h2 id="modal-title">📋 Clinical Quick-Start Guide / Guía Rápida</h2>
+      <button type="button" class="modal-close-btn" onclick="closeQuickStart()" aria-label="Close Guide">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <p class="modal-intro">
+        Designed under <strong>SCA™</strong>, <strong>Dual Coding Theory</strong>, and <strong>LPAA</strong> principles for adult neurogenic reading rehabilitation (acquired alexia, aphasia, and right-hemisphere cognitive-communication disorders).
+      </p>
+
+      <div class="modal-section">
+        <h3>1. The 3-Tier Severity Continuum</h3>
+        <ul class="modal-list">
+          <li><strong>Tier 1 (Severe):</strong> Ultra-short canonical S-V-O clauses (&lt;25 chars/line). Deconstructs compound syntax into isolated agent-action pairs anchored by standardized 68px ARASAAC pictograms.</li>
+          <li><strong>Tier 2 (Moderate):</strong> Standard propositional rail (&lt;50 chars/line). Eliminates subordinate clause regressive saccades; features salient lexical bolding and 0.85x line-level speech verification.</li>
+          <li><strong>Tier 3 (Mild / Book Mode):</strong> Continuous literary paragraph layout. Integrates on-demand click-to-speak prose with collapsible (<code>&lt;details&gt;</code>) <strong>Chapter Memory Checks</strong> to scaffold macrostructural discourse recall.</li>
+        </ul>
+      </div>
+
+      <div class="modal-section">
+        <h3>2. Tri-State Language Scaffolding</h3>
+        <ul class="modal-list">
+          <li><strong>English:</strong> Displays a single, centered column (760px max-width) optimized for monolingual clients without lateral visual distraction.</li>
+          <li><strong>Español:</strong> Displays a single, centered Spanish column for L1 assessment or Spanish-dominant recovery.</li>
+          <li><strong>Both (Bilingual):</strong> Expands into dual-column layout with <em>bilateral chromatic canalization</em> (Sage Green for English, Sky Blue for Spanish) to prevent horizontal line bleeding and saccadic drift. Includes real-time cross-linguistic hover highlighting.</li>
+        </ul>
+      </div>
+
+      <div class="modal-section">
+        <h3>3. Auditory Engine Calibration</h3>
+        <p class="modal-note">
+          Audio playback via Web Speech API is hard-locked to <strong>0.85x speed</strong> (~125 WPM) to preserve natural prosody while accommodating reduced auditory processing speeds. Voice resolution automatically prioritizes <code>en-US</code> and Latin American / Mexican Spanish (<code>es-MX</code>).
+        </p>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="a11y-btn is-active" onclick="closeQuickStart()">Got It / Entendido</button>
+    </div>
+  </div>
+</dialog>
     <header>
-      <h1>To Build a Fire — Jack London</h1>
+      <h1>To Build a Fire — Jack London</h1><button type="button" class="a11y-btn guide-trigger-btn" onclick="openQuickStart()" aria-haspopup="dialog">
+  📋 Clinical Evaluator Guide
+</button>
       <div class="metadata">Proyecto Lectura Accesible • Department of Speech & Hearing Sciences • Portland State University</div>
       <div id="voice-status" class="voice-badge">Resolving clinical speech engines...</div>
     </header>
@@ -608,6 +767,35 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   </div>
 
   <script>
+  const quickstartModal = document.getElementById('quickstart-modal');
+
+function openQuickStart() {
+  if (quickstartModal) {
+    quickstartModal.showModal();
+  }
+}
+
+function closeQuickStart() {
+  if (quickstartModal) {
+    quickstartModal.close();
+  }
+}
+
+// Close when clicking the backdrop outside the modal card
+if (quickstartModal) {
+  quickstartModal.addEventListener('click', (event) => {
+    const rect = quickstartModal.getBoundingClientRect();
+    const isInDialog = (
+      rect.top <= event.clientY &&
+      event.clientY <= rect.top + rect.height &&
+      rect.left <= event.clientX &&
+      event.clientX <= rect.left + rect.width
+    );
+    if (!isInDialog) {
+      quickstartModal.close();
+    }
+  });
+}
     function setSeverityTier(tierName) {
       document.body.classList.remove('tier-1', 'tier-2', 'tier-3');
       document.body.classList.add(tierName);
@@ -1229,4 +1417,3 @@ def build_master_reader(output_path: str = "output/bilingual_preview.html"):
 
 if __name__ == "__main__":
     build_master_reader()
-    
