@@ -1,143 +1,35 @@
 """
-Proyecto Lectura Accesible — Complete Narrative Clinical Engine
+Proyecto Lectura Accesible — Master Clinical Engine & Narrative Compiler
 Department of Speech & Hearing Sciences | Portland State University
 
-Text: Jack London — To Build a Fire (Complete 10-Scene Narrative Arc)
-Linguistic Framework: Bilingual Neurogenic Adaptation Rubric (BNAR)
-Clinical Tiers:
-  - Tier 1: Severe Acquired Alexia (10 Scenes; <25 chars/line; canonical SVO)
-  - Tier 2: Moderate Acquired Alexia (10 Scenes; <50 chars/line; propositional rail)
-  - Tier 3: Mild Alexia / Book Mode (5 Chapters; flowing prose + memory dropdowns)
-Interface:
-  - Tri-State Language: English Only | Español Only | Both (Bilingual Canalization)
-  - Visual Ergonomics: Sage-green (EN) & Sky-blue (ES) columns, 68px ARASAAC tiles, 44px targets
-  - Auditory: 0.85x Web Speech API with en-US and es-MX dialect priority
+Author: Perla Carlson, B.S., MS-SLP Candidate
+Framework: Bilingual Neurogenic Adaptation Rubric (BNAR)
+Text: Jack London — To Build a Fire (Complete 10-Scene Arc)
+License: Engine under MIT | Clinical Adaptations & Rubric © 2026 Perla Carlson
 """
 
 import os
+import shutil
 from typing import Dict, List, Optional
 from src.arasaac_client import resolve_anchor_visual
 
-HTML_TEMPLATE = """<!DOCTYPE html>
+HTML_TEMPLATE = """<!--
+  ============================================================================
+  Proyecto Lectura Accesible
+  Department of Speech & Hearing Sciences | Portland State University
+
+  Software Engine: MIT License | Copyright (c) 2026 Perla Carlson
+  Clinical Methodology & BNAR Adaptations: Copyright (c) 2026 Perla Carlson. All Rights Reserved.
+  Visual Anchors: ARASAAC (CC BY-NC-SA 4.0) | Sergio Palao / Gobierno de Aragón
+  ============================================================================
+-->
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Proyecto Lectura Accesible | Jack London — To Build a Fire</title>
   <style>
-  /* Guide Trigger Button */
-.guide-trigger-btn {
-  margin-top: 0.75rem;
-  background-color: var(--btn-bg);
-  border: 2px solid var(--accent-en);
-  color: var(--accent-en);
-}
-
-/* Accessible Native Dialog Modal */
-.clinical-modal {
-  border: 2px solid var(--border-card);
-  border-radius: 16px;
-  padding: 0;
-  max-width: 680px;
-  width: 90vw;
-  background-color: var(--bg-card);
-  color: var(--text-main);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-}
-
-.clinical-modal::backdrop {
-  background-color: rgba(15, 23, 42, 0.65);
-  backdrop-filter: blur(2px);
-}
-
-body.high-contrast .clinical-modal {
-  border-color: var(--accent-en);
-  box-shadow: 0 0 20px rgba(52, 211, 153, 0.2);
-}
-
-.modal-wrapper {
-  padding: 1.5rem;
-}
-
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 2px solid var(--border-card);
-  padding-bottom: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.modal-header h2 {
-  font-size: 1.25rem;
-  margin: 0;
-  color: var(--text-main);
-}
-
-.modal-close-btn {
-  min-width: 44px;
-  min-height: 44px;
-  background: transparent;
-  border: none;
-  font-size: 1.25rem;
-  cursor: pointer;
-  color: var(--text-muted);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal-close-btn:hover {
-  background-color: var(--btn-bg);
-  color: var(--text-main);
-}
-
-.modal-body {
-  font-size: 0.92rem;
-  line-height: 1.6;
-  max-height: 65vh;
-  overflow-y: auto;
-  padding-right: 0.5rem;
-}
-
-.modal-intro {
-  margin-top: 0;
-  color: var(--text-muted);
-  border-left: 3px solid var(--accent-en);
-  padding-left: 0.75rem;
-}
-
-.modal-section {
-  margin-top: 1.25rem;
-}
-
-.modal-section h3 {
-  font-size: 1rem;
-  margin: 0 0 0.4rem 0;
-  color: var(--accent-en);
-}
-
-.modal-list {
-  margin: 0;
-  padding-left: 1.25rem;
-}
-
-.modal-list li {
-  margin-bottom: 0.5rem;
-}
-
-.modal-note {
-  margin: 0;
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  border-top: 2px solid var(--border-card);
-  padding-top: 1rem;
-  margin-top: 1.25rem;
-}
     :root {
       --reader-font-size: 19px;
       --reader-line-height: 1.85;
@@ -161,13 +53,13 @@ body.high-contrast .clinical-modal {
       --anchor-bg: #EEF2F6;
       --anchor-border: #CBD5E1;
 
-      /* Chromatic Column Separation */
+      /* Chromatic Column Demarcation */
       --col-en-bg: #F0FDF4;
       --col-en-border: #BBF7D0;
       --col-es-bg: #EFF6FF;
       --col-es-border: #BFDBFE;
 
-      /* Memory Dropdown Styling */
+      /* Memory Accordion */
       --recap-bg: #FAF5FF;
       --recap-border: #D8B4FE;
       --recap-text: #6B21A8;
@@ -226,7 +118,15 @@ body.high-contrast .clinical-modal {
     header {
       margin-bottom: 1.5rem;
       border-bottom: 2px solid var(--border-card);
-      padding-bottom: 1rem;
+      padding-bottom: 1.25rem;
+    }
+
+    .header-top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
     }
 
     h1 {
@@ -285,7 +185,7 @@ body.high-contrast .clinical-modal {
       margin-right: 0.2rem;
     }
 
-    /* 44x44px Motor-Accessible Target Rules */
+    /* 44x44px Motor Target Standard */
     .a11y-btn {
       min-width: 44px;
       min-height: 44px;
@@ -319,7 +219,13 @@ body.high-contrast .clinical-modal {
       border-color: var(--accent-en);
     }
 
-    /* Bilateral Reading Grid */
+    .guide-trigger-btn {
+      background-color: var(--bg-card);
+      border: 2px solid var(--accent-en);
+      color: var(--accent-en);
+    }
+
+    /* Reading Grid Layout */
     .reading-grid {
       display: grid;
       transition: all 0.2s ease;
@@ -332,7 +238,6 @@ body.high-contrast .clinical-modal {
       transition: background-color 0.2s ease, border-color 0.2s ease;
     }
 
-    /* English Monolingual Mode */
     body.lang-en .reading-grid {
       grid-template-columns: 1fr;
       max-width: 760px;
@@ -343,7 +248,6 @@ body.high-contrast .clinical-modal {
     body.lang-en .col-es,
     body.lang-en .lang-column.es-col { display: none !important; }
 
-    /* Spanish Monolingual Mode */
     body.lang-es .reading-grid {
       grid-template-columns: 1fr;
       max-width: 760px;
@@ -354,7 +258,6 @@ body.high-contrast .clinical-modal {
     body.lang-es .col-en,
     body.lang-es .lang-column.en-col { display: none !important; }
 
-    /* Bilingual Dual-Column Mode */
     body.lang-both .reading-grid {
       grid-template-columns: 1fr 1fr;
       max-width: 100%;
@@ -394,7 +297,7 @@ body.high-contrast .clinical-modal {
       transition: all 0.2s ease;
     }
 
-    /* 68px ARASAAC Visual Tile */
+    /* 68px ARASAAC Anchor Tile */
     .anchor-header {
       display: flex;
       align-items: center;
@@ -473,7 +376,6 @@ body.high-contrast .clinical-modal {
     .idea-unit.en { border-left-color: var(--accent-en); }
     .idea-unit.es { border-left-color: var(--accent-es); color: var(--text-muted); }
 
-    /* Cross-Linguistic Hover Synchrony */
     .idea-unit.is-active {
       background-color: var(--sync-highlight) !important;
       color: #000000 !important;
@@ -534,7 +436,7 @@ body.high-contrast .clinical-modal {
       margin-bottom: 1.15rem;
     }
 
-    /* Tier 3 Continuous Prose Mode */
+    /* Tier 3 Prose & Memory Dropdown */
     body.tier-3 .sentence-block {
       border: none;
       box-shadow: none;
@@ -576,7 +478,6 @@ body.high-contrast .clinical-modal {
       text-decoration: underline;
     }
 
-    /* Tier 3 Metacognitive Retrieval Accordion */
     .chapter-recap-dropdown {
       background-color: var(--recap-bg);
       border: 2px solid var(--recap-border);
@@ -654,59 +555,167 @@ body.high-contrast .clinical-modal {
     body.lang-both .recap-summary .recap-title-es { display: inline; }
     body.lang-both .recap-content-body [lang="en"],
     body.lang-both .recap-content-body [lang="es"] { display: block; }
+
+    /* Modal Styling */
+    .clinical-modal {
+      border: 2px solid var(--border-card);
+      border-radius: 16px;
+      padding: 0;
+      max-width: 680px;
+      width: 90vw;
+      background-color: var(--bg-card);
+      color: var(--text-main);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+    }
+
+    .clinical-modal::backdrop {
+      background-color: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(2px);
+    }
+
+    body.high-contrast .clinical-modal {
+      border-color: var(--accent-en);
+      box-shadow: 0 0 20px rgba(52, 211, 153, 0.2);
+    }
+
+    .modal-wrapper {
+      padding: 1.5rem;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid var(--border-card);
+      padding-bottom: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .modal-header h2 {
+      font-size: 1.25rem;
+      margin: 0;
+      color: var(--text-main);
+    }
+
+    .modal-close-btn {
+      min-width: 44px;
+      min-height: 44px;
+      background: transparent;
+      border: none;
+      font-size: 1.25rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close-btn:hover {
+      background-color: var(--btn-bg);
+      color: var(--text-main);
+    }
+
+    .modal-body {
+      font-size: 0.92rem;
+      line-height: 1.6;
+      max-height: 65vh;
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+
+    .modal-intro {
+      margin-top: 0;
+      color: var(--text-muted);
+      border-left: 3px solid var(--accent-en);
+      padding-left: 0.75rem;
+    }
+
+    .modal-section {
+      margin-top: 1.25rem;
+    }
+
+    .modal-section h3 {
+      font-size: 1rem;
+      margin: 0 0 0.4rem 0;
+      color: var(--accent-en);
+    }
+
+    .modal-list {
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+
+    .modal-list li {
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      border-top: 2px solid var(--border-card);
+      padding-top: 1rem;
+      margin-top: 1.25rem;
+    }
   </style>
 </head>
 <body class="tier-2 lang-both">
   <div class="container">
-  <!-- Clinical Quick-Start Guide Modal -->
-<dialog id="quickstart-modal" class="clinical-modal" aria-labelledby="modal-title">
-  <div class="modal-wrapper">
-    <div class="modal-header">
-      <h2 id="modal-title">📋 Clinical Quick-Start Guide / Guía Rápida</h2>
-      <button type="button" class="modal-close-btn" onclick="closeQuickStart()" aria-label="Close Guide">✕</button>
-    </div>
+    <!-- Quick-Start Dialog -->
+    <dialog id="quickstart-modal" class="clinical-modal" aria-labelledby="modal-title">
+      <div class="modal-wrapper">
+        <div class="modal-header">
+          <h2 id="modal-title">📋 Clinical Quick-Start Guide / Guía Rápida</h2>
+          <button type="button" class="modal-close-btn" onclick="closeQuickStart()" aria-label="Close Guide">✕</button>
+        </div>
 
-    <div class="modal-body">
-      <p class="modal-intro">
-        Designed under <strong>SCA™</strong>, <strong>Dual Coding Theory</strong>, and <strong>LPAA</strong> principles for adult neurogenic reading rehabilitation (acquired alexia, aphasia, and right-hemisphere cognitive-communication disorders).
-      </p>
+        <div class="modal-body">
+          <p class="modal-intro">
+            Designed under <strong>SCA™</strong>, <strong>Dual Coding Theory</strong>, and <strong>LPAA</strong> principles for adult neurogenic reading rehabilitation (acquired alexia, aphasia, and cognitive-communication disorders).
+          </p>
 
-      <div class="modal-section">
-        <h3>1. The 3-Tier Severity Continuum</h3>
-        <ul class="modal-list">
-          <li><strong>Tier 1 (Severe):</strong> Ultra-short canonical S-V-O clauses (&lt;25 chars/line). Deconstructs compound syntax into isolated agent-action pairs anchored by standardized 68px ARASAAC pictograms.</li>
-          <li><strong>Tier 2 (Moderate):</strong> Standard propositional rail (&lt;50 chars/line). Eliminates subordinate clause regressive saccades; features salient lexical bolding and 0.85x line-level speech verification.</li>
-          <li><strong>Tier 3 (Mild / Book Mode):</strong> Continuous literary paragraph layout. Integrates on-demand click-to-speak prose with collapsible (<code>&lt;details&gt;</code>) <strong>Chapter Memory Checks</strong> to scaffold macrostructural discourse recall.</li>
-        </ul>
+          <div class="modal-section">
+            <h3>1. The 3-Tier Severity Continuum</h3>
+            <ul class="modal-list">
+              <li><strong>Tier 1 (Severe):</strong> Ultra-short canonical S-V-O clauses (&lt;25 chars/line). Deconstructs compound syntax into isolated agent-action pairs anchored by 68px ARASAAC pictograms.</li>
+              <li><strong>Tier 2 (Moderate):</strong> Standard propositional rail (&lt;50 chars/line). Eliminates subordinate clause regressive saccades; features salient lexical bolding and 0.85x line-level speech verification.</li>
+              <li><strong>Tier 3 (Mild / Book Mode):</strong> Continuous literary paragraph layout. Integrates on-demand click-to-speak prose with collapsible (<code>&lt;details&gt;</code>) <strong>Chapter Memory Checks</strong> to scaffold macrostructural recall.</li>
+            </ul>
+          </div>
+
+          <div class="modal-section">
+            <h3>2. Tri-State Language Scaffolding</h3>
+            <ul class="modal-list">
+              <li><strong>English:</strong> Displays a single, centered column (760px max-width) for monolingual processing without lateral visual distraction.</li>
+              <li><strong>Español:</strong> Displays a single, centered Spanish column for L1 assessment or Spanish-dominant recovery.</li>
+              <li><strong>Both (Bilingual):</strong> Expands into dual-column layout with <em>bilateral chromatic canalization</em> (Sage Green for English, Sky Blue for Spanish) to prevent horizontal line bleeding. Includes real-time cross-linguistic hover highlighting.</li>
+            </ul>
+          </div>
+
+          <div class="modal-section">
+            <h3>3. Auditory Engine Calibration</h3>
+            <p>
+              Audio playback via Web Speech API is hard-locked to <strong>0.85x speed</strong> (~125 WPM) to preserve natural prosody while accommodating reduced auditory processing speeds. Voice resolution prioritizes <code>en-US</code> and Latin American / Mexican Spanish (<code>es-MX</code>).
+            </p>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="a11y-btn is-active" onclick="closeQuickStart()">Got It / Entendido</button>
+        </div>
       </div>
+    </dialog>
 
-      <div class="modal-section">
-        <h3>2. Tri-State Language Scaffolding</h3>
-        <ul class="modal-list">
-          <li><strong>English:</strong> Displays a single, centered column (760px max-width) optimized for monolingual clients without lateral visual distraction.</li>
-          <li><strong>Español:</strong> Displays a single, centered Spanish column for L1 assessment or Spanish-dominant recovery.</li>
-          <li><strong>Both (Bilingual):</strong> Expands into dual-column layout with <em>bilateral chromatic canalization</em> (Sage Green for English, Sky Blue for Spanish) to prevent horizontal line bleeding and saccadic drift. Includes real-time cross-linguistic hover highlighting.</li>
-        </ul>
-      </div>
-
-      <div class="modal-section">
-        <h3>3. Auditory Engine Calibration</h3>
-        <p class="modal-note">
-          Audio playback via Web Speech API is hard-locked to <strong>0.85x speed</strong> (~125 WPM) to preserve natural prosody while accommodating reduced auditory processing speeds. Voice resolution automatically prioritizes <code>en-US</code> and Latin American / Mexican Spanish (<code>es-MX</code>).
-        </p>
-      </div>
-    </div>
-
-    <div class="modal-footer">
-      <button type="button" class="a11y-btn is-active" onclick="closeQuickStart()">Got It / Entendido</button>
-    </div>
-  </div>
-</dialog>
     <header>
-      <h1>To Build a Fire — Jack London</h1><button type="button" class="a11y-btn guide-trigger-btn" onclick="openQuickStart()" aria-haspopup="dialog">
-  📋 Clinical Evaluator Guide
-</button>
-      <div class="metadata">Proyecto Lectura Accesible • Department of Speech & Hearing Sciences • Portland State University</div>
+      <div class="header-top">
+        <div>
+          <h1>To Build a Fire — Jack London</h1>
+          <div class="metadata">Proyecto Lectura Accesible • Department of Speech & Hearing Sciences • Portland State University</div>
+        </div>
+        <button type="button" class="a11y-btn guide-trigger-btn" onclick="openQuickStart()" aria-haspopup="dialog">
+          📋 Clinical Evaluator Guide
+        </button>
+      </div>
       <div id="voice-status" class="voice-badge">Resolving clinical speech engines...</div>
     </header>
 
@@ -762,40 +771,34 @@ body.high-contrast .clinical-modal {
     <footer style="margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border-card); font-size: 0.75rem; color: var(--text-muted); text-align: center;">
       Pictographic symbols used in this reader are property of the Government of Aragón and were created by Sergio Palao for 
       <a href="http://www.arasaac.org" target="_blank" rel="noopener" style="color: inherit; font-weight: 700;">ARASAAC</a>, 
-      licensed under Creative Commons (BY-NC-SA). Adapted for clinical speech-language pathology research at Portland State University.
+      licensed under Creative Commons (BY-NC-SA 4.0). Clinical adaptation methodology, BNAR Rubric, and software engine © 2026 Perla Carlson. All Rights Reserved.
     </footer>
   </div>
 
   <script>
-  const quickstartModal = document.getElementById('quickstart-modal');
+    const quickstartModal = document.getElementById('quickstart-modal');
 
-function openQuickStart() {
-  if (quickstartModal) {
-    quickstartModal.showModal();
-  }
-}
-
-function closeQuickStart() {
-  if (quickstartModal) {
-    quickstartModal.close();
-  }
-}
-
-// Close when clicking the backdrop outside the modal card
-if (quickstartModal) {
-  quickstartModal.addEventListener('click', (event) => {
-    const rect = quickstartModal.getBoundingClientRect();
-    const isInDialog = (
-      rect.top <= event.clientY &&
-      event.clientY <= rect.top + rect.height &&
-      rect.left <= event.clientX &&
-      event.clientX <= rect.left + rect.width
-    );
-    if (!isInDialog) {
-      quickstartModal.close();
+    function openQuickStart() {
+      if (quickstartModal) quickstartModal.showModal();
     }
-  });
-}
+
+    function closeQuickStart() {
+      if (quickstartModal) quickstartModal.close();
+    }
+
+    if (quickstartModal) {
+      quickstartModal.addEventListener('click', (event) => {
+        const rect = quickstartModal.getBoundingClientRect();
+        const isInDialog = (
+          rect.top <= event.clientY &&
+          event.clientY <= rect.top + rect.height &&
+          rect.left <= event.clientX &&
+          event.clientX <= rect.left + rect.width
+        );
+        if (!isInDialog) quickstartModal.close();
+      });
+    }
+
     function setSeverityTier(tierName) {
       document.body.classList.remove('tier-1', 'tier-2', 'tier-3');
       document.body.classList.add(tierName);
@@ -1005,58 +1008,34 @@ def generate_sentence_block(block_idx: int, prefix: str, en_lines: List[str], es
     """
 
 def build_master_reader(output_path: str = "output/bilingual_preview.html"):
-    """Compiles the complete 10-scene narrative arc into the 3-tier clinical reader."""
+    """Compiles the complete 10-scene narrative arc and syncs directly to root index.html."""
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-    # =========================================================================
-    # TIER 1: SEVERE ACQUIRED ALEXIA (10 Complete Scenes; <25 Chars/Line; SVO)
-    # =========================================================================
+    # --- TIER 1: SEVERE (10 Scenes; <25 chars/line; SVO) ---
     t1_en = [
-        # Scene 1: The Trail
         ["The day was <strong>cold</strong>.", "The snow was <strong>deep</strong>.", "A man <strong>walked</strong>.", "A dog <strong>followed</strong>."],
-        # Scene 2: Nine O'Clock
         ["It was <strong>nine o'clock</strong>.", "There was <strong>no sun</strong>.", "The sky was <strong>gray</strong>."],
-        # Scene 3: Extreme Cold
         ["The air was <strong>freezing</strong>.", "Spit <strong>cracked</strong> in air.", "It was <strong>fifty below</strong>."],
-        # Scene 4: The Dog
         ["The dog had <strong>gray fur</strong>.", "The dog was a <strong>husky</strong>.", "The dog felt the <strong>cold</strong>."],
-        # Scene 5: Hidden Springs
         ["Water ran under <strong>snow</strong>.", "The ice was <strong>thin</strong>.", "It was a hidden <strong>trap</strong>."],
-        # Scene 6: Breaking the Ice
         ["The dog broke the <strong>ice</strong>.", "Its paws got <strong>wet</strong>.", "The dog bit the <strong>ice off</strong>."],
-        # Scene 7: The Man Falls In
         ["The man fell in <strong>water</strong>.", "His feet got <strong>wet</strong>.", "He must make a <strong>fire</strong>."],
-        # Scene 8: Building the Fire
         ["He gathered dry <strong>twigs</strong>.", "He lit a small <strong>fire</strong>.", "The flame grew <strong>warm</strong>."],
-        # Scene 9: The Snow Falls
         ["Snow fell from a <strong>tree</strong>.", "Snow hit the <strong>fire</strong>.", "The fire went <strong>out</strong>."],
-        # Scene 10: The Sleep & The Dog
         ["His hands were <strong>frozen</strong>.", "The man went to <strong>sleep</strong>.", "The dog ran to <strong>camp</strong>."]
     ]
-
     t1_es = [
-        # Scene 1: El camino
         ["El día estaba <strong>frío</strong>.", "La nieve era <strong>profunda</strong>.", "Un hombre <strong>caminaba</strong>.", "Un perro lo <strong>seguía</strong>."],
-        # Scene 2: Las nueve
         ["Eran las <strong>nueve</strong>.", "No había <strong>sol</strong>.", "El cielo estaba <strong>gris</strong>."],
-        # Scene 3: Frío extremo
         ["El aire era <strong>helado</strong>.", "La saliva <strong>tronó</strong> al caer.", "Hacía <strong>mucho frío</strong>."],
-        # Scene 4: El perro
         ["El perro tenía <strong>pelo gris</strong>.", "El perro era un <strong>husky</strong>.", "El perro sentía el <strong>peligro</strong>."],
-        # Scene 5: Manantiales ocultos
         ["Había agua bajo la <strong>nieve</strong>.", "El hielo era muy <strong>delgado</strong>.", "Era una <strong>trampa</strong> oculta."],
-        # Scene 6: El perro en el agua
         ["El perro rompió el <strong>hielo</strong>.", "Sus patas se <strong>mojaron</strong>.", "El perro mordió el <strong>hielo</strong>."],
-        # Scene 7: El hombre cae
         ["El hombre cayó al <strong>agua</strong>.", "Sus pies se <strong>mojaron</strong>.", "Él debe hacer un <strong>fuego</strong>."],
-        # Scene 8: Encender el fuego
         ["Juntó ramas <strong>secas</strong>.", "Encendió un pequeño <strong>fuego</strong>.", "La llama daba <strong>calor</strong>."],
-        # Scene 9: Cae la nieve
         ["Cayó nieve de un <strong>pino</strong>.", "La nieve apagó el <strong>fuego</strong>.", "El fuego se <strong>murió</strong>."],
-        # Scene 10: El sueño y el perro
         ["Sus manos se <strong>congelaron</strong>.", "El hombre se quedó <strong>dormido</strong>.", "El perro corrió al <strong>campamento</strong>."]
     ]
-
     t1_anchors = [
         {"tag": "Tier 1 • Scene 1", "icon": resolve_anchor_visual("pine_forest", "🌲"), "concept": "The Cold Trail / El camino frío", "alert": None},
         {"tag": "Tier 1 • Scene 2", "icon": resolve_anchor_visual("clock", "⏱️"), "concept": "Nine O'Clock / Las nueve de la mañana", "alert": None},
@@ -1069,14 +1048,10 @@ def build_master_reader(output_path: str = "output/bilingual_preview.html"):
         {"tag": "Tier 1 • Scene 9", "icon": resolve_anchor_visual("extreme_cold", "🌲❄️"), "concept": "The Snow Falls / Cae la nieve", "alert": "⚠️ Disaster: Fire extinguished"},
         {"tag": "Tier 1 • Scene 10", "icon": resolve_anchor_visual("husky_wolf_dog", "💤"), "concept": "Peaceful Sleep / Sueño y supervivencia", "alert": None}
     ]
-
     t1_blocks = [generate_sentence_block(i, "t1", t1_en[i], t1_es[i], t1_anchors[i]) for i in range(len(t1_en))]
 
-    # =========================================================================
-    # TIER 2: MODERATE ACQUIRED ALEXIA (10 Complete Scenes; <50 Chars; SVO)
-    # =========================================================================
+    # --- TIER 2: MODERATE (10 Scenes; <50 chars; Propositional Rail) ---
     t2_en = [
-        # Scene 1: The Trail
         [
             "The morning was <strong>cold and gray</strong>.",
             "A man walked on the <strong>Yukon trail</strong>.",
@@ -1084,63 +1059,54 @@ def build_master_reader(output_path: str = "output/bilingual_preview.html"):
             "A narrow path led into the <strong>forest</strong>.",
             "The forest was full of <strong>pine trees</strong>."
         ],
-        # Scene 2: Nine O'Clock
         [
             "The man stopped to <strong>check the time</strong>.",
             "It was <strong>nine o'clock</strong> in the morning.",
             "There was <strong>no sun</strong> in the sky.",
             "A thick white fog covered the <strong>entire land</strong>."
         ],
-        # Scene 3: Extreme Cold
         [
             "The man spat into the <strong>freezing air</strong>.",
             "There was a sharp <strong>crackling noise</strong>.",
             "His spit <strong>turned to ice</strong> in mid-air.",
             "He knew the cold was <strong>fifty degrees below zero</strong>."
         ],
-        # Scene 4: The Dog
         [
             "A large dog walked <strong>behind the man</strong>.",
             "The dog was a <strong>husky wolf-dog</strong>.",
             "The dog was <strong>afraid of the terrible cold</strong>.",
             "The animal knew it was <strong>too cold to travel</strong>."
         ],
-        # Scene 5: Hidden Springs
         [
             "The man walked along a <strong>frozen creek</strong>.",
             "Hidden water ran under the <strong>soft snow</strong>.",
             "The deep pools were <strong>dangerous traps</strong>.",
             "He watched the snow with <strong>great care</strong>."
         ],
-        # Scene 6: The Dog Breaks Ice
         [
             "The man forced the dog to <strong>walk ahead</strong>.",
             "The dog fell through a <strong>sheet of ice</strong>.",
             "The animal wet its <strong>legs and paws</strong>.",
             "It bit the ice off between its <strong>toes</strong>."
         ],
-        # Scene 7: The Accident
         [
             "The man stepped on a <strong>patch of soft snow</strong>.",
             "He broke through the <strong>hidden ice</strong>.",
             "The freezing water soaked his <strong>boots and socks</strong>.",
             "He was angry because he had to <strong>stop and dry off</strong>."
         ],
-        # Scene 8: Building the Fire
         [
             "He built a fire under a <strong>large pine tree</strong>.",
             "He gathered dry <strong>grass and pine needles</strong>.",
             "A match produced a small <strong>warm flame</strong>.",
             "He added larger twigs and the <strong>fire grew strong</strong>."
         ],
-        # Scene 9: The Snow Extinguishes Fire
         [
             "The tree branches held a heavy <strong>pile of snow</strong>.",
             "The man pulled twigs and <strong>shook the tree</strong>.",
             "A heavy load of snow fell <strong>onto the fire</strong>.",
             "The fire was completely <strong>put out</strong>."
         ],
-        # Scene 10: The Sleep & The Dog Escapes
         [
             "His fingers were frozen like <strong>blocks of wood</strong>.",
             "He could not light a <strong>single match</strong>.",
@@ -1148,9 +1114,7 @@ def build_master_reader(output_path: str = "output/bilingual_preview.html"):
             "The dog smelled death and ran to the <strong>camp</strong>."
         ]
     ]
-
     t2_es = [
-        # Scene 1: El camino
         [
             "La mañana estaba <strong>fría y gris</strong>.",
             "Un hombre caminaba por el <strong>camino de Yukón</strong>.",
@@ -1158,63 +1122,54 @@ def build_master_reader(output_path: str = "output/bilingual_preview.html"):
             "Un sendero estrecho entraba al <strong>bosque</strong>.",
             "El bosque estaba lleno de <strong>pinos</strong>."
         ],
-        # Scene 2: Las nueve
         [
             "El hombre se detuvo a <strong>mirar la hora</strong>.",
             "Eran las <strong>nueve de la mañana</strong>.",
             "No había <strong>sol</strong> en el cielo.",
             "Una niebla blanca cubría <strong>toda la tierra</strong>."
         ],
-        # Scene 3: Frío extremo
         [
             "El hombre escupió en el <strong>aire congelado</strong>.",
             "Hubo un sonido <strong>seco y crujiente</strong>.",
             "La saliva <strong>se convirtió en hielo</strong> en el aire.",
             "Él supo que el frío era de <strong>cincuenta grados bajo cero</strong>."
         ],
-        # Scene 4: El perro
         [
             "Un perro grande caminaba <strong>detrás del hombre</strong>.",
             "El perro era un <strong>husky cruzado con lobo</strong>.",
             "El animal tenía <strong>miedo del frío extremo</strong>.",
             "El perro sabía que era <strong>peligroso viajar</strong>."
         ],
-        # Scene 5: Manantiales ocultos
         [
             "El hombre caminaba junto al <strong>arroyo helado</strong>.",
             "El agua oculta corría bajo la <strong>nieve suave</strong>.",
             "Las pozas de agua eran <strong>trampas peligrosas</strong>.",
             "Él miraba la nieve con <strong>mucho cuidado</strong>."
         ],
-        # Scene 6: El perro en el agua
         [
             "El hombre obligó al perro a <strong>caminar adelante</strong>.",
             "El perro cayó en una <strong>capa de hielo</strong>.",
             "El animal se mojó las <strong>patas</strong>.",
             "El perro mordió el hielo entre sus <strong>dedos</strong>."
         ],
-        # Scene 7: El accidente
         [
             "El hombre pisó una <strong>zona de nieve blanda</strong>.",
             "Él rompió el <strong>hielo oculto</strong>.",
             "El agua congelada mojó sus <strong>botas y calcetines</strong>.",
             "Él se enojó porque debía <strong>parar a secarse</strong>."
         ],
-        # Scene 8: Encender el fuego
         [
             "Él hizo una fogata debajo de un <strong>gran pino</strong>.",
             "Juntó pasto seco y <strong>hojas de pino</strong>.",
             "Un fósforo encendió una pequeña <strong>llama tibia</strong>.",
             "Añadió ramas más grandes y el <strong>fuego creció fuerte</strong>."
         ],
-        # Scene 9: La nieve sobre el fuego
         [
             "Las ramas del pino tenían una <strong>carga de nieve</strong>.",
             "El hombre jaló ramas y <strong>sacudió el árbol</strong>.",
             "Un montón de nieve cayó <strong>sobre el fuego</strong>.",
             "El fuego se apagó por <strong>completo</strong>."
         ],
-        # Scene 10: El sueño y el perro
         [
             "Sus dedos estaban duros como <strong>pedazos de madera</strong>.",
             "Él no pudo encender ningún <strong>otro fósforo</strong>.",
@@ -1222,7 +1177,6 @@ def build_master_reader(output_path: str = "output/bilingual_preview.html"):
             "El perro olió la muerte y corrió al <strong>campamento</strong>."
         ]
     ]
-
     t2_anchors = [
         {"tag": "Tier 2 • Scene 1", "icon": resolve_anchor_visual("pine_forest", "🌲"), "concept": "The Yukon Trail / El camino de Yukón", "alert": None},
         {"tag": "Tier 2 • Scene 2", "icon": resolve_anchor_visual("clock", "⏱️"), "concept": "Nine O'Clock & No Sun / Las nueve de la mañana", "alert": None},
@@ -1235,14 +1189,10 @@ def build_master_reader(output_path: str = "output/bilingual_preview.html"):
         {"tag": "Tier 2 • Scene 9", "icon": resolve_anchor_visual("extreme_cold", "🌲❄️"), "concept": "The Snow Avalanche / La nieve apaga el fuego", "alert": "⚠️ Catastrophic Event: Fire extinguished by snow"},
         {"tag": "Tier 2 • Scene 10", "icon": resolve_anchor_visual("husky_wolf_dog", "💤"), "concept": "The Final Sleep / El sueño final y la salvación", "alert": None}
     ]
-
     t2_blocks = [generate_sentence_block(i, "t2", t2_en[i], t2_es[i], t2_anchors[i]) for i in range(len(t2_en))]
 
-    # =========================================================================
-    # TIER 3: MILD / AUTONOMOUS BOOK MODE (5 Chapters with Memory Recaps)
-    # =========================================================================
+    # --- TIER 3: MILD / BOOK MODE (5 Chapters + Memory Recaps) ---
     t3_en = [
-        # Chapter 1: The Trail and the Cold (Scenes 1-2)
         [
             "Day had broken cold and gray, exceedingly cold and gray, in the deep Yukon wilderness.",
             "A solitary traveler turned aside from the main trail and climbed the steep earth bank into the pine forest.",
@@ -1250,7 +1200,6 @@ def build_master_reader(output_path: str = "output/bilingual_preview.html"):
             "It was nine o'clock in the morning, and there was no sun nor hint of sun in the clear, empty sky.",
             "A thick white gloom hung over the face of the frozen world."
         ],
-        # Chapter 2: The Dog and the Cold (Scenes 3-4)
         [
             "The man spat into the freezing air, and there was a sharp, dry crackle before it touched the snow.",
             "He knew that at fifty degrees below zero spittle crackled on the snow, but this had crackled in mid-air.",
@@ -1258,7 +1207,6 @@ def build_master_reader(output_path: str = "output/bilingual_preview.html"):
             "The animal was depressed by the tremendous cold and knew by instinct that it was too dangerous to travel.",
             "In reality, the cold was seventy-five degrees below zero, and danger was everywhere."
         ],
-        # Chapter 3: The Hidden Traps and the Accident (Scenes 5-7)
         [
             "The man continued walking along the frozen bed of Henderson Creek.",
             "He knew that unfrozen mountain springs flowed beneath the snow, creating deadly water traps.",
@@ -1266,7 +1214,6 @@ def build_master_reader(output_path: str = "output/bilingual_preview.html"):
             "A mile farther, the man himself stepped into a hidden spring and soaked his boots halfway to his knees.",
             "He cursed his bad luck, knowing he had to build a fire immediately to dry his feet or lose them to frostbite."
         ],
-        # Chapter 4: The Fire and the Disaster (Scenes 8-9)
         [
             "The man worked carefully to build a fire beneath the sheltering boughs of a large spruce pine.",
             "He lit a dry curl of birch bark with a sulfur match and nurtured a small, crackling flame.",
@@ -1274,7 +1221,6 @@ def build_master_reader(output_path: str = "output/bilingual_preview.html"):
             "Then disaster struck: the tree branches were overloaded with snow from weeks of winter storms.",
             "Each time he pulled a twig, the tree shook, until a huge avalanche of snow fell directly onto the fire and smothered it into smoke."
         ],
-        # Chapter 5: The Frozen Matches, the Run, and the Sleep (Scene 10)
         [
             "The man panicked as the cold crept into his bones, and his fingers turned into frozen blocks of wood.",
             "He struck the entire bundle of seventy matches at once against his leg, but his numb hands dropped them into the snow.",
@@ -1283,9 +1229,7 @@ def build_master_reader(output_path: str = "output/bilingual_preview.html"):
             "The dog sat and waited, smelled the scent of death on the quiet body, and turned to trot toward the warm fires of the camp."
         ]
     ]
-
     t3_es = [
-        # Capítulo 1: El camino y el frío
         [
             "El día había comenzado frío y gris, sumamente frío y gris, en el desierto blanco de Yukón.",
             "Un viajero solitario se desvió del camino principal y subió una pendiente de tierra para entrar al bosque de pinos.",
@@ -1293,7 +1237,6 @@ def build_master_reader(output_path: str = "output/bilingual_preview.html"):
             "Eran las nueve de la mañana y no había rastro de sol en el cielo despejado y vacío.",
             "Una densa niebla blanca cubría por completo la tierra congelada."
         ],
-        # Capítulo 2: El perro y el frío extremo
         [
             "El hombre escupió en el aire congelado y la saliva produjo un chasquido seco antes de tocar la nieve.",
             "Él sabía que a cincuenta bajo cero la saliva tronaba en la nieve, pero esta había tronado en el aire.",
@@ -1301,7 +1244,6 @@ def build_master_reader(output_path: str = "output/bilingual_preview.html"):
             "El animal estaba desanimado por el frío tremendo y su instinto le advertía que era peligroso viajar.",
             "En realidad, la temperatura era de setenta y cinco grados bajo cero y el peligro estaba en todas partes."
         ],
-        # Capítulo 3: Las trampas ocultas y el accidente
         [
             "El hombre continuó caminando junto al cauce congelado del arroyo.",
             "Él sabía que manantiales ocultos corrían bajo la nieve, creando peligrosas trampas de agua.",
@@ -1309,7 +1251,6 @@ def build_master_reader(output_path: str = "output/bilingual_preview.html"):
             "Una milla después, el hombre pisó una trampa oculta y el agua helada le cubrió las botas hasta las rodillas.",
             "Maldijo su mala suerte, sabiendo que debía encender un fuego de inmediato para secarse los pies antes de congelarse."
         ],
-        # Capítulo 4: La fogata y el desastre
         [
             "El hombre trabajó con cuidado para hacer una fogata debajo de las ramas de un gran pino.",
             "Encendió un pedazo de corteza seca con un fósforo y cuidó una pequeña llama viva.",
@@ -1317,16 +1258,14 @@ def build_master_reader(output_path: str = "output/bilingual_preview.html"):
             "Pero ocurrió el desastre: las ramas del pino estaban cargadas de nieve acumulada durante semanas.",
             "Cada vez que él jalaba una ramita, el árbol se sacudía, hasta que un montón de nieve cayó sobre la fogata y la apagó por completo."
         ],
-        # Capítulo 5: Los fósforos, la carrera y el descanso final
         [
             "El hombre sintió pánico cuando el frío se metió en su cuerpo y sus dedos se endurecieron como pedazos de madera.",
             "Frotó todo el paquete de setenta fósforos contra su pierna, pero sus manos sin fuerza los dejaron caer a la nieve.",
-            "Desesperado, corrió por el sendero intentando entrar en calor, pero sus piernas congeladas fallaron y cayó al suelo.",
+            "Desesperado, corrió por el sendero intentando entrar en calor, pero sus piernas congeladas colapsan.",
             "Una agradable sensación de calor lo envolvió, y se sentó junto a un pino, quedándose en un sueño tranquilo y eterno.",
             "El perro esperó sentado, olió la muerte en el cuerpo inmóvil y dio la vuelta para trotar hacia las fogatas del campamento."
         ]
     ]
-
     t3_anchors = [
         {"tag": "Tier 3 • Chapter 1", "icon": "🌲", "concept": "The Yukon Trail (Prose)", "alert": None},
         {"tag": "Tier 3 • Chapter 2", "icon": "🐺", "concept": "Extreme Cold & Animal Instinct", "alert": None},
@@ -1334,9 +1273,7 @@ def build_master_reader(output_path: str = "output/bilingual_preview.html"):
         {"tag": "Tier 3 • Chapter 4", "icon": "🔥", "concept": "The Life Fire & The Avalanche", "alert": "⚠️ Catastrophe: Fire smothered by snow"},
         {"tag": "Tier 3 • Chapter 5", "icon": "📖", "concept": "The Final Run & Eternal Rest", "alert": None}
     ]
-
     t3_recaps = [
-        # Recap Ch 1
         {
             "en": [
                 "<strong>Setting:</strong> The Yukon forest at 9:00 AM in extreme cold.",
@@ -1349,7 +1286,6 @@ def build_master_reader(output_path: str = "output/bilingual_preview.html"):
                 "<strong>Acción:</strong> Un viajero solitario se desvía del camino hacia el bosque de pinos."
             ]
         },
-        # Recap Ch 2
         {
             "en": [
                 "<strong>The Real Temperature:</strong> 75 degrees below zero (spit freezes in mid-air).",
@@ -1362,7 +1298,6 @@ def build_master_reader(output_path: str = "output/bilingual_preview.html"):
                 "<strong>El juicio del hombre:</strong> El viajero ignora las señales y sigue caminando."
             ]
         },
-        # Recap Ch 3
         {
             "en": [
                 "<strong>The Water Traps:</strong> Warm springs flow beneath the snow without freezing.",
@@ -1375,7 +1310,6 @@ def build_master_reader(output_path: str = "output/bilingual_preview.html"):
                 "<strong>Regla de supervivencia:</strong> Pies mojados exigen encender fuego de inmediato para no congelarse."
             ]
         },
-        # Recap Ch 4
         {
             "en": [
                 "<strong>The First Fire:</strong> The man successfully starts a warm fire under a large pine.",
@@ -1388,7 +1322,6 @@ def build_master_reader(output_path: str = "output/bilingual_preview.html"):
                 "<strong>La tragedia:</strong> Una avalancha de nieve cae sobre la fogata y la apaga por completo."
             ]
         },
-        # Recap Ch 5
         {
             "en": [
                 "<strong>Frozen Hands:</strong> His fingers go completely numb; he burns his flesh lighting 70 matches at once.",
@@ -1402,18 +1335,36 @@ def build_master_reader(output_path: str = "output/bilingual_preview.html"):
             ]
         }
     ]
-
     t3_blocks = [generate_sentence_block(i, "t3", t3_en[i], t3_es[i], t3_anchors[i], t3_recaps[i]) for i in range(len(t3_en))]
 
-    # Assemble and compile template
+    # Assemble HTML
     output_html = HTML_TEMPLATE.replace("__TIER_1_BLOCKS__", "\n".join(t1_blocks))
     output_html = output_html.replace("__TIER_2_BLOCKS__", "\n".join(t2_blocks))
     output_html = output_html.replace("__TIER_3_BLOCKS__", "\n".join(t3_blocks))
 
+    # 1. Write preview file
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(output_html)
+    print(f"✓ Master Clinical Prototype compiled: {output_path}")
 
-    print(f"✓ Complete Jack London narrative compiled successfully: {output_path}")
+    # 2. Automatically sync to root index.html for GitHub Pages
+    root_index = "index.html"
+    with open(root_index, "w", encoding="utf-8") as f:
+        f.write(output_html)
+    print(f"✓ Synchronized directly to GitHub Pages deployment root: {root_index}")
+
+    # 3. Synchronize cached ARASAAC assets to root assets/
+    cached_src = os.path.join("output", "assets", "pictograms")
+    root_dest = os.path.join("assets", "pictograms")
+    if os.path.exists(cached_src):
+        os.makedirs(root_dest, exist_ok=True)
+        for item in os.listdir(cached_src):
+            s = os.path.join(cached_src, item)
+            d = os.path.join(root_dest, item)
+            if os.path.isfile(s):
+                shutil.copy2(s, d)
+        print(f"✓ Synchronized ARASAAC assets to root: {root_dest}")
 
 if __name__ == "__main__":
     build_master_reader()
+    

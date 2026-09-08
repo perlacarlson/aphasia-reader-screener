@@ -1,3 +1,13 @@
+<!--
+  ============================================================================
+  Proyecto Lectura Accesible
+  Department of Speech & Hearing Sciences | Portland State University
+
+  Software Engine: MIT License | Copyright (c) 2026 Perla Carlson
+  Clinical Methodology & BNAR Adaptations: Copyright (c) 2026 Perla Carlson. All Rights Reserved.
+  Visual Anchors: ARASAAC (CC BY-NC-SA 4.0) | Sergio Palao / Gobierno de Aragón
+  ============================================================================
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,13 +38,13 @@
       --anchor-bg: #EEF2F6;
       --anchor-border: #CBD5E1;
 
-      /* Chromatic Column Separation */
+      /* Chromatic Column Demarcation */
       --col-en-bg: #F0FDF4;
       --col-en-border: #BBF7D0;
       --col-es-bg: #EFF6FF;
       --col-es-border: #BFDBFE;
 
-      /* Memory Dropdown Styling */
+      /* Memory Accordion */
       --recap-bg: #FAF5FF;
       --recap-border: #D8B4FE;
       --recap-text: #6B21A8;
@@ -93,7 +103,15 @@
     header {
       margin-bottom: 1.5rem;
       border-bottom: 2px solid var(--border-card);
-      padding-bottom: 1rem;
+      padding-bottom: 1.25rem;
+    }
+
+    .header-top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
     }
 
     h1 {
@@ -152,7 +170,7 @@
       margin-right: 0.2rem;
     }
 
-    /* 44x44px Motor-Accessible Target Rules */
+    /* 44x44px Motor Target Standard */
     .a11y-btn {
       min-width: 44px;
       min-height: 44px;
@@ -186,7 +204,13 @@
       border-color: var(--accent-en);
     }
 
-    /* Bilateral Reading Grid */
+    .guide-trigger-btn {
+      background-color: var(--bg-card);
+      border: 2px solid var(--accent-en);
+      color: var(--accent-en);
+    }
+
+    /* Reading Grid Layout */
     .reading-grid {
       display: grid;
       transition: all 0.2s ease;
@@ -199,7 +223,6 @@
       transition: background-color 0.2s ease, border-color 0.2s ease;
     }
 
-    /* English Monolingual Mode */
     body.lang-en .reading-grid {
       grid-template-columns: 1fr;
       max-width: 760px;
@@ -210,7 +233,6 @@
     body.lang-en .col-es,
     body.lang-en .lang-column.es-col { display: none !important; }
 
-    /* Spanish Monolingual Mode */
     body.lang-es .reading-grid {
       grid-template-columns: 1fr;
       max-width: 760px;
@@ -221,7 +243,6 @@
     body.lang-es .col-en,
     body.lang-es .lang-column.en-col { display: none !important; }
 
-    /* Bilingual Dual-Column Mode */
     body.lang-both .reading-grid {
       grid-template-columns: 1fr 1fr;
       max-width: 100%;
@@ -261,7 +282,7 @@
       transition: all 0.2s ease;
     }
 
-    /* 68px ARASAAC Visual Tile */
+    /* 68px ARASAAC Anchor Tile */
     .anchor-header {
       display: flex;
       align-items: center;
@@ -340,7 +361,6 @@
     .idea-unit.en { border-left-color: var(--accent-en); }
     .idea-unit.es { border-left-color: var(--accent-es); color: var(--text-muted); }
 
-    /* Cross-Linguistic Hover Synchrony */
     .idea-unit.is-active {
       background-color: var(--sync-highlight) !important;
       color: #000000 !important;
@@ -401,7 +421,7 @@
       margin-bottom: 1.15rem;
     }
 
-    /* Tier 3 Continuous Prose Mode */
+    /* Tier 3 Prose & Memory Dropdown */
     body.tier-3 .sentence-block {
       border: none;
       box-shadow: none;
@@ -443,7 +463,6 @@
       text-decoration: underline;
     }
 
-    /* Tier 3 Metacognitive Retrieval Accordion */
     .chapter-recap-dropdown {
       background-color: var(--recap-bg);
       border: 2px solid var(--recap-border);
@@ -521,13 +540,167 @@
     body.lang-both .recap-summary .recap-title-es { display: inline; }
     body.lang-both .recap-content-body [lang="en"],
     body.lang-both .recap-content-body [lang="es"] { display: block; }
+
+    /* Modal Styling */
+    .clinical-modal {
+      border: 2px solid var(--border-card);
+      border-radius: 16px;
+      padding: 0;
+      max-width: 680px;
+      width: 90vw;
+      background-color: var(--bg-card);
+      color: var(--text-main);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+    }
+
+    .clinical-modal::backdrop {
+      background-color: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(2px);
+    }
+
+    body.high-contrast .clinical-modal {
+      border-color: var(--accent-en);
+      box-shadow: 0 0 20px rgba(52, 211, 153, 0.2);
+    }
+
+    .modal-wrapper {
+      padding: 1.5rem;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid var(--border-card);
+      padding-bottom: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .modal-header h2 {
+      font-size: 1.25rem;
+      margin: 0;
+      color: var(--text-main);
+    }
+
+    .modal-close-btn {
+      min-width: 44px;
+      min-height: 44px;
+      background: transparent;
+      border: none;
+      font-size: 1.25rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close-btn:hover {
+      background-color: var(--btn-bg);
+      color: var(--text-main);
+    }
+
+    .modal-body {
+      font-size: 0.92rem;
+      line-height: 1.6;
+      max-height: 65vh;
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+
+    .modal-intro {
+      margin-top: 0;
+      color: var(--text-muted);
+      border-left: 3px solid var(--accent-en);
+      padding-left: 0.75rem;
+    }
+
+    .modal-section {
+      margin-top: 1.25rem;
+    }
+
+    .modal-section h3 {
+      font-size: 1rem;
+      margin: 0 0 0.4rem 0;
+      color: var(--accent-en);
+    }
+
+    .modal-list {
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+
+    .modal-list li {
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      border-top: 2px solid var(--border-card);
+      padding-top: 1rem;
+      margin-top: 1.25rem;
+    }
   </style>
 </head>
 <body class="tier-2 lang-both">
   <div class="container">
+    <!-- Quick-Start Dialog -->
+    <dialog id="quickstart-modal" class="clinical-modal" aria-labelledby="modal-title">
+      <div class="modal-wrapper">
+        <div class="modal-header">
+          <h2 id="modal-title">📋 Clinical Quick-Start Guide / Guía Rápida</h2>
+          <button type="button" class="modal-close-btn" onclick="closeQuickStart()" aria-label="Close Guide">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <p class="modal-intro">
+            Designed under <strong>SCA™</strong>, <strong>Dual Coding Theory</strong>, and <strong>LPAA</strong> principles for adult neurogenic reading rehabilitation (acquired alexia, aphasia, and cognitive-communication disorders).
+          </p>
+
+          <div class="modal-section">
+            <h3>1. The 3-Tier Severity Continuum</h3>
+            <ul class="modal-list">
+              <li><strong>Tier 1 (Severe):</strong> Ultra-short canonical S-V-O clauses (&lt;25 chars/line). Deconstructs compound syntax into isolated agent-action pairs anchored by 68px ARASAAC pictograms.</li>
+              <li><strong>Tier 2 (Moderate):</strong> Standard propositional rail (&lt;50 chars/line). Eliminates subordinate clause regressive saccades; features salient lexical bolding and 0.85x line-level speech verification.</li>
+              <li><strong>Tier 3 (Mild / Book Mode):</strong> Continuous literary paragraph layout. Integrates on-demand click-to-speak prose with collapsible (<code>&lt;details&gt;</code>) <strong>Chapter Memory Checks</strong> to scaffold macrostructural recall.</li>
+            </ul>
+          </div>
+
+          <div class="modal-section">
+            <h3>2. Tri-State Language Scaffolding</h3>
+            <ul class="modal-list">
+              <li><strong>English:</strong> Displays a single, centered column (760px max-width) for monolingual processing without lateral visual distraction.</li>
+              <li><strong>Español:</strong> Displays a single, centered Spanish column for L1 assessment or Spanish-dominant recovery.</li>
+              <li><strong>Both (Bilingual):</strong> Expands into dual-column layout with <em>bilateral chromatic canalization</em> (Sage Green for English, Sky Blue for Spanish) to prevent horizontal line bleeding. Includes real-time cross-linguistic hover highlighting.</li>
+            </ul>
+          </div>
+
+          <div class="modal-section">
+            <h3>3. Auditory Engine Calibration</h3>
+            <p>
+              Audio playback via Web Speech API is hard-locked to <strong>0.85x speed</strong> (~125 WPM) to preserve natural prosody while accommodating reduced auditory processing speeds. Voice resolution prioritizes <code>en-US</code> and Latin American / Mexican Spanish (<code>es-MX</code>).
+            </p>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="a11y-btn is-active" onclick="closeQuickStart()">Got It / Entendido</button>
+        </div>
+      </div>
+    </dialog>
+
     <header>
-      <h1>To Build a Fire — Jack London</h1>
-      <div class="metadata">Proyecto Lectura Accesible • Department of Speech & Hearing Sciences • Portland State University</div>
+      <div class="header-top">
+        <div>
+          <h1>To Build a Fire — Jack London</h1>
+          <div class="metadata">Proyecto Lectura Accesible • Department of Speech & Hearing Sciences • Portland State University</div>
+        </div>
+        <button type="button" class="a11y-btn guide-trigger-btn" onclick="openQuickStart()" aria-haspopup="dialog">
+          📋 Clinical Evaluator Guide
+        </button>
+      </div>
       <div id="voice-status" class="voice-badge">Resolving clinical speech engines...</div>
     </header>
 
@@ -2019,8 +2192,8 @@
         </div>
         
         <div class="unit-wrapper">
-          <button class="tts-btn es" onclick="playSpeech('Desesperado, corrió por el sendero intentando entrar en calor, pero sus piernas congeladas fallaron y cayó al suelo.', 't3-b4-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
-          <div class="idea-unit es" data-sync="t3-b4-l2">Desesperado, corrió por el sendero intentando entrar en calor, pero sus piernas congeladas fallaron y cayó al suelo.</div>
+          <button class="tts-btn es" onclick="playSpeech('Desesperado, corrió por el sendero intentando entrar en calor, pero sus piernas congeladas colapsan.', 't3-b4-l2', 'es-US')" title="Escuchar en español" aria-label="Escuchar en español">🔊</button>
+          <div class="idea-unit es" data-sync="t3-b4-l2">Desesperado, corrió por el sendero intentando entrar en calor, pero sus piernas congeladas colapsan.</div>
         </div>
         
         <div class="unit-wrapper">
@@ -2060,11 +2233,34 @@
     <footer style="margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border-card); font-size: 0.75rem; color: var(--text-muted); text-align: center;">
       Pictographic symbols used in this reader are property of the Government of Aragón and were created by Sergio Palao for 
       <a href="http://www.arasaac.org" target="_blank" rel="noopener" style="color: inherit; font-weight: 700;">ARASAAC</a>, 
-      licensed under Creative Commons (BY-NC-SA). Adapted for clinical speech-language pathology research at Portland State University.
+      licensed under Creative Commons (BY-NC-SA 4.0). Clinical adaptation methodology, BNAR Rubric, and software engine © 2026 Perla Carlson. All Rights Reserved.
     </footer>
   </div>
 
   <script>
+    const quickstartModal = document.getElementById('quickstart-modal');
+
+    function openQuickStart() {
+      if (quickstartModal) quickstartModal.showModal();
+    }
+
+    function closeQuickStart() {
+      if (quickstartModal) quickstartModal.close();
+    }
+
+    if (quickstartModal) {
+      quickstartModal.addEventListener('click', (event) => {
+        const rect = quickstartModal.getBoundingClientRect();
+        const isInDialog = (
+          rect.top <= event.clientY &&
+          event.clientY <= rect.top + rect.height &&
+          rect.left <= event.clientX &&
+          event.clientX <= rect.left + rect.width
+        );
+        if (!isInDialog) quickstartModal.close();
+      });
+    }
+
     function setSeverityTier(tierName) {
       document.body.classList.remove('tier-1', 'tier-2', 'tier-3');
       document.body.classList.add(tierName);
