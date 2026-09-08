@@ -1,17 +1,25 @@
 """
-Proyecto Lectura Accesible — Master Clinical Engine & Narrative Compiler
+Proyecto Lectura Accesible — Master Clinical Engine & Multi-Text Compiler
 Department of Speech & Hearing Sciences | Portland State University
 
 Author: Perla Carlson, B.S., MS-SLP Candidate
 Framework: Bilingual Neurogenic Adaptation Rubric (BNAR)
-Text: Jack London — To Build a Fire (Complete 10-Scene Arc)
+Texts:
+  1. Jack London — To Build a Fire (Complete 10-Scene Arc)
+  2. O. Henry — The Last Leaf (Clinical Adaptation: Scene 1)
 License: Engine under MIT | Clinical Adaptations & Rubric © 2026 Perla Carlson
 """
 
 import os
 import shutil
 from typing import Dict, List, Optional
-from src.arasaac_client import resolve_anchor_visual
+
+try:
+    from src.arasaac_client import resolve_anchor_visual
+except ImportError:
+    # Graceful fallback if executed directly as a script
+    def resolve_anchor_visual(key: str, fallback: str) -> str:
+        return fallback
 
 HTML_TEMPLATE = """<!--
   ============================================================================
@@ -28,7 +36,7 @@ HTML_TEMPLATE = """<!--
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Proyecto Lectura Accesible | Jack London — To Build a Fire</title>
+  <title>Proyecto Lectura Accesible | Multi-Text Clinical Reader</title>
   <style>
     :root {
       --reader-font-size: 19px;
@@ -185,7 +193,6 @@ HTML_TEMPLATE = """<!--
       margin-right: 0.2rem;
     }
 
-    /* 44x44px Motor Target Standard */
     .a11y-btn {
       min-width: 44px;
       min-height: 44px;
@@ -219,13 +226,65 @@ HTML_TEMPLATE = """<!--
       border-color: var(--accent-en);
     }
 
+    /* Story Selector Dropdown */
+    .story-dropdown {
+      min-height: 44px;
+      background-color: var(--btn-bg);
+      color: var(--text-main);
+      border: 2px solid var(--btn-border);
+      border-radius: 8px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      padding: 0 0.85rem;
+      cursor: pointer;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.15s ease;
+    }
+
+    .story-dropdown:hover,
+    .story-dropdown:focus-visible {
+      border-color: var(--accent-en);
+    }
+
+    body.high-contrast .story-dropdown {
+      background-color: #000000;
+      color: #FFFFFF;
+      border-color: var(--btn-border);
+    }
+
     .guide-trigger-btn {
       background-color: var(--bg-card);
       border: 2px solid var(--accent-en);
       color: var(--accent-en);
     }
 
-    /* Reading Grid Layout */
+    /* Story Wrapper & Pure CSS Tier Visibility */
+    .story-wrapper {
+      display: none;
+    }
+
+    .story-wrapper.is-active {
+      display: block;
+    }
+
+    .tier-view {
+      display: none !important;
+    }
+
+    body.tier-1 .story-wrapper.is-active .tier-1-view {
+      display: block !important;
+    }
+
+    body.tier-2 .story-wrapper.is-active .tier-2-view {
+      display: block !important;
+    }
+
+    body.tier-3 .story-wrapper.is-active .tier-3-view {
+      display: block !important;
+    }
+
+    /* Reading Grid & Column Tinting */
     .reading-grid {
       display: grid;
       transition: all 0.2s ease;
@@ -297,7 +356,6 @@ HTML_TEMPLATE = """<!--
       transition: all 0.2s ease;
     }
 
-    /* 68px ARASAAC Anchor Tile */
     .anchor-header {
       display: flex;
       align-items: center;
@@ -661,7 +719,7 @@ HTML_TEMPLATE = """<!--
 </head>
 <body class="tier-2 lang-both">
   <div class="container">
-    <!-- Quick-Start Dialog -->
+    <!-- Clinical Quick-Start Modal -->
     <dialog id="quickstart-modal" class="clinical-modal" aria-labelledby="modal-title">
       <div class="modal-wrapper">
         <div class="modal-header">
@@ -695,7 +753,7 @@ HTML_TEMPLATE = """<!--
           <div class="modal-section">
             <h3>3. Auditory Engine Calibration</h3>
             <p>
-              Audio playback via Web Speech API is hard-locked to <strong>0.85x speed</strong> (~125 WPM) to preserve natural prosody while accommodating reduced auditory processing speeds. Voice resolution prioritizes <code>en-US</code> and Latin American / Mexican Spanish (<code>es-MX</code>).
+              Audio playback via Web Speech API is hard-locked to <strong>0.85x speed</strong> (~125 WPM) to preserve natural prosody while accommodating reduced auditory processing speeds. Voice resolution automatically prioritizes <code>en-US</code> and Latin American / Mexican Spanish (<code>es-MX</code>).
             </p>
           </div>
         </div>
@@ -709,7 +767,7 @@ HTML_TEMPLATE = """<!--
     <header>
       <div class="header-top">
         <div>
-          <h1>To Build a Fire — Jack London</h1>
+          <h1 id="main-story-title">To Build a Fire — Jack London</h1>
           <div class="metadata">Proyecto Lectura Accesible • Department of Speech & Hearing Sciences • Portland State University</div>
         </div>
         <button type="button" class="a11y-btn guide-trigger-btn" onclick="openQuickStart()" aria-haspopup="dialog">
@@ -720,6 +778,14 @@ HTML_TEMPLATE = """<!--
     </header>
 
     <section class="a11y-toolbar" aria-label="Reading Controls">
+      <div class="a11y-group">
+        <label for="story-select" class="a11y-label">Text:</label>
+        <select id="story-select" class="story-dropdown" onchange="switchStory(this.value)" aria-label="Select Literary Text">
+          <option value="story-london" selected>Jack London — To Build a Fire</option>
+          <option value="story-ohenry">O. Henry — The Last Leaf</option>
+        </select>
+      </div>
+
       <div class="a11y-group">
         <span class="a11y-label">Tier:</span>
         <button type="button" id="btn-tier-1" class="a11y-btn" onclick="setSeverityTier('tier-1')">Tier 1 (Severe)</button>
@@ -755,17 +821,7 @@ HTML_TEMPLATE = """<!--
     </div>
 
     <main id="narrative-canvas">
-      <div id="content-tier-1" class="tier-view" style="display: none;">
-        __TIER_1_BLOCKS__
-      </div>
-
-      <div id="content-tier-2" class="tier-view">
-        __TIER_2_BLOCKS__
-      </div>
-
-      <div id="content-tier-3" class="tier-view" style="display: none;">
-        __TIER_3_BLOCKS__
-      </div>
+      __NARRATIVE_CANVAS__
     </main>
 
     <footer style="margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border-card); font-size: 0.75rem; color: var(--text-muted); text-align: center;">
@@ -799,12 +855,28 @@ HTML_TEMPLATE = """<!--
       });
     }
 
+    function switchStory(storyId) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+
+      document.querySelectorAll('.story-wrapper').forEach(wrapper => {
+        wrapper.classList.remove('is-active');
+      });
+
+      const selectedWrapper = document.getElementById(storyId);
+      if (selectedWrapper) {
+        selectedWrapper.classList.add('is-active');
+        const mainTitle = document.getElementById('main-story-title');
+        if (mainTitle && selectedWrapper.dataset.title) {
+          mainTitle.innerText = selectedWrapper.dataset.title;
+        }
+      }
+    }
+
     function setSeverityTier(tierName) {
       document.body.classList.remove('tier-1', 'tier-2', 'tier-3');
       document.body.classList.add(tierName);
-
-      document.querySelectorAll('.tier-view').forEach(el => el.style.display = 'none');
-      document.getElementById('content-' + tierName).style.display = 'block';
 
       ['tier-1', 'tier-2', 'tier-3'].forEach(t => {
         const btn = document.getElementById('btn-' + t);
@@ -1008,10 +1080,12 @@ def generate_sentence_block(block_idx: int, prefix: str, en_lines: List[str], es
     """
 
 def build_master_reader(output_path: str = "output/bilingual_preview.html"):
-    """Compiles the complete 10-scene narrative arc and syncs directly to root index.html."""
+    """Compiles all literary texts and syncs directly to root index.html."""
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-    # --- TIER 1: SEVERE (10 Scenes; <25 chars/line; SVO) ---
+    # =========================================================================
+    # STORY 1: JACK LONDON — TO BUILD A FIRE (Complete 10-Scene Arc)
+    # =========================================================================
     t1_en = [
         ["The day was <strong>cold</strong>.", "The snow was <strong>deep</strong>.", "A man <strong>walked</strong>.", "A dog <strong>followed</strong>."],
         ["It was <strong>nine o'clock</strong>.", "There was <strong>no sun</strong>.", "The sky was <strong>gray</strong>."],
@@ -1048,9 +1122,8 @@ def build_master_reader(output_path: str = "output/bilingual_preview.html"):
         {"tag": "Tier 1 • Scene 9", "icon": resolve_anchor_visual("extreme_cold", "🌲❄️"), "concept": "The Snow Falls / Cae la nieve", "alert": "⚠️ Disaster: Fire extinguished"},
         {"tag": "Tier 1 • Scene 10", "icon": resolve_anchor_visual("husky_wolf_dog", "💤"), "concept": "Peaceful Sleep / Sueño y supervivencia", "alert": None}
     ]
-    t1_blocks = [generate_sentence_block(i, "t1", t1_en[i], t1_es[i], t1_anchors[i]) for i in range(len(t1_en))]
+    london_t1 = "\n".join([generate_sentence_block(i, "lon-t1", t1_en[i], t1_es[i], t1_anchors[i]) for i in range(len(t1_en))])
 
-    # --- TIER 2: MODERATE (10 Scenes; <50 chars; Propositional Rail) ---
     t2_en = [
         [
             "The morning was <strong>cold and gray</strong>.",
@@ -1189,9 +1262,8 @@ def build_master_reader(output_path: str = "output/bilingual_preview.html"):
         {"tag": "Tier 2 • Scene 9", "icon": resolve_anchor_visual("extreme_cold", "🌲❄️"), "concept": "The Snow Avalanche / La nieve apaga el fuego", "alert": "⚠️ Catastrophic Event: Fire extinguished by snow"},
         {"tag": "Tier 2 • Scene 10", "icon": resolve_anchor_visual("husky_wolf_dog", "💤"), "concept": "The Final Sleep / El sueño final y la salvación", "alert": None}
     ]
-    t2_blocks = [generate_sentence_block(i, "t2", t2_en[i], t2_es[i], t2_anchors[i]) for i in range(len(t2_en))]
+    london_t2 = "\n".join([generate_sentence_block(i, "lon-t2", t2_en[i], t2_es[i], t2_anchors[i]) for i in range(len(t2_en))])
 
-    # --- TIER 3: MILD / BOOK MODE (5 Chapters + Memory Recaps) ---
     t3_en = [
         [
             "Day had broken cold and gray, exceedingly cold and gray, in the deep Yukon wilderness.",
@@ -1335,19 +1407,116 @@ def build_master_reader(output_path: str = "output/bilingual_preview.html"):
             ]
         }
     ]
-    t3_blocks = [generate_sentence_block(i, "t3", t3_en[i], t3_es[i], t3_anchors[i], t3_recaps[i]) for i in range(len(t3_en))]
+    london_t3 = "\n".join([generate_sentence_block(i, "lon-t3", t3_en[i], t3_es[i], t3_anchors[i], t3_recaps[i]) for i in range(len(t3_en))])
 
-    # Assemble HTML
-    output_html = HTML_TEMPLATE.replace("__TIER_1_BLOCKS__", "\n".join(t1_blocks))
-    output_html = output_html.replace("__TIER_2_BLOCKS__", "\n".join(t2_blocks))
-    output_html = output_html.replace("__TIER_3_BLOCKS__", "\n".join(t3_blocks))
+    # =========================================================================
+    # STORY 2: O. HENRY — THE LAST LEAF (Clinical Adaptation: Scene 1)
+    # =========================================================================
+    oh_t1_en = [
+        ["Two artists <strong>lived</strong> here.", "Sue and Johnsy <strong>painted</strong>.", "The studio was <strong>small</strong>.", "November brought <strong>cold</strong>."]
+    ]
+    oh_t1_es = [
+        ["Dos artistas <strong>vivían</strong> aquí.", "Sue y Johnsy <strong>pintaban</strong>.", "El estudio era <strong>pequeño</strong>.", "Noviembre trajo el <strong>frío</strong>."]
+    ]
+    oh_t1_anchors = [
+        {"tag": "Tier 1 • Scene 1", "icon": resolve_anchor_visual("art_palette", "🎨"), "concept": "The Art Studio / El estudio de arte", "alert": None}
+    ]
+    ohenry_t1 = "\n".join([generate_sentence_block(i, "oh-t1", oh_t1_en[i], oh_t1_es[i], oh_t1_anchors[i]) for i in range(len(oh_t1_en))])
+
+    oh_t2_en = [
+        [
+            "Two young artists <strong>lived in New York</strong>.",
+            "Sue and Johnsy shared a <strong>top studio</strong>.",
+            "The two women loved <strong>art and painting</strong>.",
+            "In November, a <strong>cold sickness struck</strong>.",
+            "Doctors called this illness <strong>pneumonia</strong>."
+        ]
+    ]
+    oh_t2_es = [
+        [
+            "Dos jóvenes artistas <strong>vivían en Nueva York</strong>.",
+            "Sue y Johnsy compartían un <strong>estudio alto</strong>.",
+            "Las dos mujeres amaban el <strong>arte y la pintura</strong>.",
+            "En noviembre, una <strong>enfermedad fría atacó</strong>.",
+            "Los médicos llamaban a este mal <strong>pulmonía</strong>."
+        ]
+    ]
+    oh_t2_anchors = [
+        {
+            "tag": "Tier 2 • Scene 1",
+            "icon": resolve_anchor_visual("pneumonia_illness", "🩺"),
+            "concept": "The Sickness in Greenwich / La enfermedad en el barrio",
+            "alert": "⚠️ Metaphor Unpacked: Abstract disease personification replaced with direct medical referents"
+        }
+    ]
+    ohenry_t2 = "\n".join([generate_sentence_block(i, "oh-t2", oh_t2_en[i], oh_t2_es[i], oh_t2_anchors[i]) for i in range(len(oh_t2_en))])
+
+    oh_t3_en = [
+        [
+            "In Greenwich Village, narrow streets curved between old brick buildings.",
+            "At the top of a three-story house, two young artists named Sue and Johnsy shared a painting studio.",
+            "They had met at a restaurant on Eighth Street, discovered they loved the same art, and decided to live together.",
+            "All through the autumn, their life was happy and filled with color.",
+            "But in cold November, an unseen sickness crept into the neighborhood.",
+            "The doctors called this cold visitor Pneumonia, and it struck people across the city with icy fingers."
+        ]
+    ]
+    oh_t3_es = [
+        [
+            "En Greenwich Village, las calles estrechas cruzaban entre viejos edificios de ladrillo.",
+            "En el último piso de una casa de tres pisos, dos jóvenes artistas llamadas Sue y Johnsy compartían un estudio de pintura.",
+            "Se habían conocido en un restaurante de la calle Ocho, descubrieron que amaban el mismo arte y decidieron vivir juntas.",
+            "Durante todo el otoño, su vida fue tranquila y llena de color.",
+            "Pero en el frío noviembre, una enfermedad invisible entró al vecindario.",
+            "Los médicos llamaban a este visitante frío pulmonía, y atacaba a la gente por toda la ciudad con dedos helados."
+        ]
+    ]
+    oh_t3_anchors = [
+        {"tag": "Tier 3 • Chapter 1", "icon": "🎨", "concept": "Greenwich Village & The Cold Visitor", "alert": None}
+    ]
+    oh_t3_recaps = [
+        {
+            "en": [
+                "<strong>Setting:</strong> Greenwich Village art studio in late autumn (November).",
+                "<strong>Characters:</strong> Sue and Johnsy, two young painters sharing an apartment.",
+                "<strong>Primary Threat:</strong> A dangerous respiratory illness (pneumonia) enters the district."
+            ],
+            "es": [
+                "<strong>Lugar:</strong> Estudio de arte en Greenwich Village a finales de otoño (noviembre).",
+                "<strong>Personajes:</strong> Sue y Johnsy, dos jóvenes pintoras que comparten un departamento.",
+                "<strong>Amenaza:</strong> Una enfermedad respiratoria peligrosa (la pulmonía) entra al barrio."
+            ]
+        }
+    ]
+    ohenry_t3 = "\n".join([generate_sentence_block(i, "oh-t3", oh_t3_en[i], oh_t3_es[i], oh_t3_anchors[i], oh_t3_recaps[i]) for i in range(len(oh_t3_en))])
+
+    # =========================================================================
+    # NARRATIVE CANVAS ASSEMBLY (Multi-Story Architecture)
+    # =========================================================================
+    narrative_canvas = f"""
+      <!-- STORY 1: JACK LONDON -->
+      <article id="story-london" class="story-wrapper is-active" data-title="To Build a Fire — Jack London">
+        <div class="tier-view tier-1-view">{london_t1}</div>
+        <div class="tier-view tier-2-view">{london_t2}</div>
+        <div class="tier-view tier-3-view">{london_t3}</div>
+      </article>
+
+      <!-- STORY 2: O. HENRY -->
+      <article id="story-ohenry" class="story-wrapper" data-title="The Last Leaf — O. Henry">
+        <div class="tier-view tier-1-view">{ohenry_t1}</div>
+        <div class="tier-view tier-2-view">{ohenry_t2}</div>
+        <div class="tier-view tier-3-view">{ohenry_t3}</div>
+      </article>
+    """
+
+    output_html = HTML_TEMPLATE.replace("__NARRATIVE_CANVAS__", narrative_canvas)
 
     # 1. Write preview file
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(output_html)
     print(f"✓ Master Clinical Prototype compiled: {output_path}")
 
-    # 2. Automatically sync to root index.html for GitHub Pages
+    # 2. Synchronize directly to root index.html for GitHub Pages
     root_index = "index.html"
     with open(root_index, "w", encoding="utf-8") as f:
         f.write(output_html)
