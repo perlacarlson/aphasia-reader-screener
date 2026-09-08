@@ -22,7 +22,9 @@ VERIFIED_ARASAAC_IDS = {
     "husky_wolf_dog": 2838,  # Lobo / Wolf
     "fire": 2341,            # Fuego / Fire
     "boots": 2494,           # Botas / Boots (replaces broken 24174)
-    "danger": 25315          # Peligro / Danger
+    "danger": 25315,          # Peligro / Danger
+    "art_palette": 6951,
+    "pneumonia_illness": 25315,
 }
 
 def fetch_arasaac_id_by_keyword(keyword: str, locale: str = "en") -> Optional[int]:
